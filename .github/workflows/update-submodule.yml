@@ -19,7 +19,7 @@ jobs:
           cd content  # submodule path
           git fetch
           git checkout ${{ github.event.client_payload.commit }}
-          cd ../..
+          cd ..
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
           git add content
