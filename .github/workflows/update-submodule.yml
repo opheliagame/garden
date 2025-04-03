@@ -1,0 +1,28 @@
+name: Update Submodule
+
+on:
+  repository_dispatch:
+    types: [submodule-update]
+
+jobs:
+  update-submodule:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+          token: ${{ secrets.PAT_TOKEN }}
+      
+      - name: Update submodule
+        run: |
+          cd content  # submodule path
+          git fetch
+          git checkout ${{ github.event.client_payload.commit }}
+          cd ../..
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          git add content
+          git commit -m "Update submodule to latest commit"
+          git push origin HEAD:${{ github.ref }}
+          
