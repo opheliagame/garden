@@ -25,6 +25,13 @@ export default ((opts?: Options) => {
             </li>
           ))}
         </ul>
+        {/* Font credits */}
+        <hr />
+        <p>
+          Fonts used are <a href="https://velvetyne.fr/fonts/basteleur/">Basteleur</a> by Keussel
+          and <a href="https://velvetyne.fr/fonts/sligoil/">Sligoil</a> by Ariel Martín Pérez both
+          available at <a href="https://velvetyne.fr">velvetyne.fr</a>.
+        </p>
       </footer>
     )
   }
