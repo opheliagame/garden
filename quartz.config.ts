@@ -19,35 +19,33 @@ const config: QuartzConfig = {
     ignorePatterns: ["private", "templates", ".obsidian"],
     defaultDateType: "created",
     theme: {
-      fontOrigin: "googleFonts",
-      cdnCaching: true,
+      fontOrigin: "local",
+      cdnCaching: false,
       typography: {
-        // header: "Schibsted Grotesk",
-        header: "Major Mono Display",
-        // body: "Source Sans Pro",
-        body: "Space Grotesk",
+        header: "Basteleur",
+        body: "Sligoil",
         code: "IBM Plex Mono",
       },
       colors: {
         lightMode: {
-          light: "#faf8f8",
-          lightgray: "#e5e5e5",
-          gray: "#b8b8b8",
-          darkgray: "#4e4e4e",
-          dark: "#2b2b2b",
-          secondary: "#284b63",
-          tertiary: "#84a59d",
-          highlight: "rgba(143, 159, 169, 0.15)",
+          light: "#ebfff0", // Airy mint background
+          lightgray: "#c5ffdb", // Soft lime
+          gray: "#74e291", // Vibrant green
+          darkgray: "#2d9d5c", // Medium emerald
+          dark: "#174029", // Deep forest
+          secondary: "#ff1493", // Deep pink
+          tertiary: "#d373ff", // Bright magenta-purple
+          highlight: "rgba(255, 20, 147, 0.15)", // Transparent deep pink
         },
         darkMode: {
-          light: "#161618",
-          lightgray: "#393639",
-          gray: "#646464",
-          darkgray: "#d4d4d4",
-          dark: "#ebebec",
-          secondary: "#7b97aa",
-          tertiary: "#84a59d",
-          highlight: "rgba(143, 159, 169, 0.15)",
+          light: "#0c2614", // Rich dark green
+          lightgray: "#1a4027", // Dark emerald
+          gray: "#35964b", // Medium green
+          darkgray: "#84ffa8", // Bright mint
+          dark: "#ddffea", // Pale mint
+          secondary: "#ff47b6", // Electric pink
+          tertiary: "#b73fff", // Vivid magenta
+          highlight: "rgba(255, 71, 182, 0.15)", // Transparent electric pink
         },
       },
     },
