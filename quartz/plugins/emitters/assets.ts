@@ -6,10 +6,43 @@ import { glob } from "../../util/glob"
 import DepGraph from "../../depgraph"
 import { Argv } from "../../util/ctx"
 import { QuartzConfig } from "../../cfg"
+import sharp from "sharp"
+
+interface ImageVariant {
+  width: number
+  suffix: string
+  format?: keyof sharp.FormatEnum
+}
+
+const defaultImageVariants: ImageVariant[] = [
+  { width: 480, suffix: "-sm", format: "webp" },
+  { width: 1024, suffix: "-md", format: "webp" },
+  { width: 1920, suffix: "-lg", format: "webp" },
+]
 
 const filesToCopy = async (argv: Argv, cfg: QuartzConfig) => {
   // glob all non MD files in content folder and copy it over
   return await glob("**", argv.directory, ["**/*.md", ...cfg.configuration.ignorePatterns])
+}
+
+const generateImageVariants = async (argv: Argv, fp: FilePath) => {
+  const src = joinSegments(argv.directory, fp) as FilePath
+
+  const name = slugifyFilePath(fp)
+  const ext = path.extname(name)
+  const baseName = name.slice(0, name.length - ext.length)
+  const dir = path.dirname(name) as FilePath
+
+  const destDir = joinSegments(argv.output, dir) as FilePath
+  await fs.promises.mkdir(destDir, { recursive: true })
+
+  const variants = defaultImageVariants.map(async (variant) => {
+    const outPath = joinSegments(argv.output, `${baseName}${variant.suffix}.webp`) as FilePath
+    await sharp(src).resize({ width: variant.width }).toFormat("webp").toFile(outPath)
+    return outPath
+  })
+
+  return await Promise.all(variants)
 }
 
 export const Assets: QuartzEmitterPlugin = () => {
@@ -48,6 +81,7 @@ export const Assets: QuartzEmitterPlugin = () => {
         const dest = joinSegments(assetsPath, name) as FilePath
         const dir = path.dirname(dest) as FilePath
         await fs.promises.mkdir(dir, { recursive: true }) // ensure dir exists
+        generateImageVariants(argv, fp)
         await fs.promises.copyFile(src, dest)
         res.push(dest)
       }
