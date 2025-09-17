@@ -38,6 +38,7 @@ const generateImageVariants = async (argv: Argv, fp: FilePath) => {
 
   const variants = defaultImageVariants.map(async (variant) => {
     const outPath = joinSegments(argv.output, `${baseName}${variant.suffix}.webp`) as FilePath
+    console.log(outPath)
     await sharp(src).resize({ width: variant.width }).toFormat("webp").toFile(outPath)
     return outPath
   })
@@ -81,7 +82,9 @@ export const Assets: QuartzEmitterPlugin = () => {
         const dest = joinSegments(assetsPath, name) as FilePath
         const dir = path.dirname(dest) as FilePath
         await fs.promises.mkdir(dir, { recursive: true }) // ensure dir exists
-        generateImageVariants(argv, fp)
+        if ([".jpg", ".jpeg", ".png"].includes(path.extname(fp))) {
+          generateImageVariants(argv, fp)
+        }
         await fs.promises.copyFile(src, dest)
         res.push(dest)
       }
