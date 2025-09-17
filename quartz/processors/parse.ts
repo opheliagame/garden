@@ -25,7 +25,6 @@ export function createProcessor(ctx: BuildCtx): QuartzProcessor {
       // base Markdown -> MD AST
       .use(remarkParse)
       // .use(remarkReferenceLinks)
-      
 
       // MD AST -> MD AST transforms
       .use(
@@ -39,9 +38,6 @@ export function createProcessor(ctx: BuildCtx): QuartzProcessor {
       .use(remarkRehype, { allowDangerousHtml: true })
       // HTML AST -> HTML AST transforms
       .use(transformers.filter((p) => p.htmlPlugins).flatMap((plugin) => plugin.htmlPlugins!(ctx)))
-      
-      
-      
   )
 }
 
@@ -113,7 +109,6 @@ export function createFileParser(ctx: BuildCtx, fps: FilePath[]) {
         //   .run(ast, file)
         const newAst = await processor.run(ast, file)
         res.push([newAst, file])
-        console.log(newAst)
 
         if (argv.verbose) {
           console.log(`[process] ${fp} -> ${file.data.slug} (${perf.timeSince()})`)
@@ -145,20 +140,16 @@ export async function parseMarkdown(ctx: BuildCtx, fps: FilePath[]): Promise<Pro
       const processor = createProcessor(ctx)
       const parse = createFileParser(ctx, fps)
       res = await parse(processor)
-      
 
       const ast = await unified()
         .use(remarkParse)
         .use(remarkReferenceLinks)
-        .parse(await read('example.md'))
+        .parse(await read("example.md"))
 
       const res2 = await unified()
-      .use(remarkParse)
-      .use(remarkReferenceLinks)
-      .run(ast, await read('example.md'))
-
-      console.log("here!!")
-      console.log(res2)
+        .use(remarkParse)
+        .use(remarkReferenceLinks)
+        .run(ast, await read("example.md"))
     } catch (error) {
       log.end()
       throw error
