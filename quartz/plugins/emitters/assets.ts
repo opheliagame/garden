@@ -84,8 +84,9 @@ export const Assets: QuartzEmitterPlugin = () => {
         await fs.promises.mkdir(dir, { recursive: true }) // ensure dir exists
         if ([".jpg", ".jpeg", ".png"].includes(path.extname(fp))) {
           generateImageVariants(argv, fp)
+        } else {
+          await fs.promises.copyFile(src, dest)
         }
-        await fs.promises.copyFile(src, dest)
         res.push(dest)
       }
 
