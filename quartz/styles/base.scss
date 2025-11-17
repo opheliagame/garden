@@ -30,6 +30,9 @@ section {
   color: var(--darkgray);
 }
 
+p {
+}
+
 p,
 ul,
 text,
@@ -429,7 +432,11 @@ code {
 tbody,
 li,
 p {
-  line-height: 1.6rem;
+  line-height: 1.3rem;
+}
+
+p {
+  font-size: 0.9rem;
 }
 
 .table-container {
