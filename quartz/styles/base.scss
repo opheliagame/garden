@@ -43,8 +43,8 @@ ul,
 .math {
   color: var(--darkgray);
   fill: var(--darkgray);
-  overflow-wrap: anywhere;
-  hyphens: auto;
+  overflow-wrap: break-word;
+  white-space: normal;
 }
 
 .math {
@@ -87,7 +87,6 @@ a {
   }
 
   &.external {
-
     &:has(> img) {
       float: right;
       margin-right: -20%;
