@@ -26,7 +26,7 @@ section {
 }
 
 ::selection {
-  color: color-mix(in srgb, var(--tertiary) 60%, rgba(255, 255, 255, 0));
+  color: var(--highlight);
   background-color: #fff23688;
 }
 
@@ -540,14 +540,14 @@ sup {
 }
 
 // make page headings sticky to understand current reading context
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-thead {
-  position: -webkit-sticky;
-  position: sticky;
-  top: -1px;
-}
+// h1,
+// h2,
+// h3,
+// h4,
+// h5,
+// h6,
+// thead {
+//   position: -webkit-sticky;
+//   position: sticky;
+//   top: -1px;
+// }
