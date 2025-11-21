@@ -27,10 +27,7 @@ section {
 
 ::selection {
   background: color-mix(in srgb, var(--tertiary) 60%, rgba(255, 255, 255, 0));
-  color: var(--darkgray);
-}
-
-p {
+  color: #fff23688;
 }
 
 p,
@@ -535,4 +532,9 @@ ol.overflow {
   ul {
     padding-left: 1rem;
   }
+}
+
+// using superscript for footnote references causes paragraph line spacing issues, align in middle instead
+sup {
+  vertical-align: middle;
 }
