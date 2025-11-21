@@ -22,6 +22,8 @@ jobs:
         uses: green-coding-solutions/eco-ci-energy-estimation@v4 
         with:
           task: start-measurement
+          co2-calculation-method: constant
+          co2-grid-intensity-constant: 472
         continue-on-error: true 
 
       - uses: actions/checkout@v3
@@ -85,6 +87,7 @@ jobs:
         uses: green-coding-solutions/eco-ci-energy-estimation@v4 
         with:
           task: display-results
+          json-output: true
         continue-on-error: true 
 
       - name: Print eco-ci data
