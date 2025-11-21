@@ -18,18 +18,49 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
+      - name: Start Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4 # use hash or @vX here (See note below)
+        with:
+          task: start-measurement
+        # continue-on-error: true # recommended setting for production. See notes below.
+
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0 # Fetch all history for git info
           submodules: "true"
           token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Checkout Repo Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4 # use hash or @vX here (See note below)
+        with:
+          task: get-measurement
+          label: 'repo checkout'
+        # continue-on-error: true # recommended setting for production. See notes below.
+    
       - uses: actions/setup-node@v3
         with:
           node-version: 18.17
+      
       - name: Install Dependencies
         run: npm ci
+
+      - name: Setup node measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4 # use hash or @vX here (See note below)
+        with:
+          task: get-measurement
+          label: 'setup node'
+        # continue-on-error: true # recommended setting for production. See notes below.
+      
       - name: Build Quartz
         run: npx quartz build
+
+      - name: build quartz measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4 # use hash or @vX here (See note below)
+        with:
+          task: get-measurement
+          label: 'build quartz'
+        # continue-on-error: true # recommended setting for production. See notes below.
+      
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
