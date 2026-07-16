@@ -27,7 +27,7 @@ jobs:
           # co2-grid-intensity-constant: 472
         continue-on-error: true 
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
         id: checkout-step
         with:
           fetch-depth: 0 # Fetch all history for git info
@@ -45,9 +45,25 @@ jobs:
         run: |
           echo "total json: ${{ steps.checkout-step.outputs.data-lap-json }}"
     
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v6
         with:
-          node-version: 18.17
+          node-version: 24
+
+      - name: Cache dependencies
+        uses: actions/cache@v5
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Cache Quartz plugins
+        uses: actions/cache@v5
+        with:
+          path: .quartz/plugins
+          key: ${{ runner.os }}-plugins-${{ hashFiles('quartz.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-plugins-
       
       - name: Install Dependencies
         id: install-deps-step
@@ -63,6 +79,12 @@ jobs:
       - name: Print eco-ci data
         run: |
           echo "total json: ${{ steps.install-deps-step.outputs.data-lap-json }}"
+      
+      - name: Install Quartz plugins
+        run: npx quartz plugin install
+
+      - name: Check types and style
+        run: npm run check
       
       - name: Build Quartz
         id: quartz-build-step
