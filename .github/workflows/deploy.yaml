@@ -1,0 +1,107 @@
+name: Deploy Quartz site to GitHub Pages
+
+on:
+  push:
+    branches:
+      - v5
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Start Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: start-measurement
+          # these are set by default in v5, comment out
+          # co2-calculation-method: constant
+          # co2-grid-intensity-constant: 472
+        continue-on-error: true 
+
+      - uses: actions/checkout@v3
+        id: checkout-step
+        with:
+          fetch-depth: 0 # Fetch all history for git info
+          submodules: "true"
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Checkout Repo Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: get-measurement
+          label: 'repo checkout'
+        continue-on-error: true 
+      
+      - name: Print eco-ci data
+        run: |
+          echo "total json: ${{ steps.checkout-step.outputs.data-lap-json }}"
+    
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18.17
+      
+      - name: Install Dependencies
+        id: install-deps-step
+        run: npm ci
+
+      - name: Setup node measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: get-measurement
+          label: 'setup node'
+        continue-on-error: true 
+
+      - name: Print eco-ci data
+        run: |
+          echo "total json: ${{ steps.install-deps-step.outputs.data-lap-json }}"
+      
+      - name: Build Quartz
+        id: quartz-build-step
+        run: npx quartz build
+
+      - name: build quartz measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: get-measurement
+          label: 'build quartz'
+        continue-on-error: true 
+
+      - name: Print eco-ci data
+        run: |
+          echo "total json: ${{ steps.quartz-build-step.outputs.data-lap-json }}"
+      
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+      - name: Show Energy Results
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: display-results
+          json-output: true
+        continue-on-error: true 
+
+      - name: Print eco-ci data
+        run: |
+          echo "total json: ${{ steps.total-measurement-step.outputs.data-total-json }}"
+
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
