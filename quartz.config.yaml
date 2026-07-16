@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=./quartz/plugins/quartz-plugins.schema.json
 configuration:
-  pageTitle: Quartz 5
+  pageTitle: "opheliagame's digital garden"
   pageTitleSuffix: ""
   enableSPA: true
   enablePopovers: true
@@ -13,33 +13,30 @@ configuration:
     - templates
     - .obsidian
   theme:
-    fontOrigin: googleFonts
-    cdnCaching: true
+    fontOrigin: local
+    cdnCaching: false
     typography:
-      header: Schibsted Grotesk
-      body: Source Sans Pro
-      code: IBM Plex Mono
-    colors:
-      lightMode:
-        light: "#faf8f8"
-        lightgray: "#e5e5e5"
-        gray: "#b8b8b8"
-        darkgray: "#4e4e4e"
-        dark: "#2b2b2b"
-        secondary: "#284b63"
-        tertiary: "#84a59d"
-        highlight: rgba(143, 159, 169, 0.15)
-        textHighlight: "#fff23688"
-      darkMode:
-        light: "#161618"
-        lightgray: "#393639"
-        gray: "#646464"
-        darkgray: "#d4d4d4"
-        dark: "#ebebec"
-        secondary: "#7b97aa"
-        tertiary: "#84a59d"
-        highlight: rgba(143, 159, 169, 0.15)
-        textHighlight: "#b3aa0288"
+      header: "Basteleur"
+      body: "Sligoil"
+      code: "IBM Plex Mono"
+    colors: 
+      lightMode: 
+        light: "#ebfff0" # Airy mint background
+        lightgray: "#c5ffdb" # Soft lime
+        gray: "#74e291" # Vibrant green
+        darkgray: "#2d9d5c" # Medium emerald
+        dark: "#174029" # Deep forest
+        secondary: "#ff1493" # Deep pink
+        tertiary: "#d373ff" # Bright magenta-purple
+        highlight: "rgba(255, 20, 147, 0.15)" # Transparent deep pink
+      darkMode: 
+        light: "#0c2614" # Rich dark green
+        lightgray: "#1a4027" # Dark emerald
+        gray: "#35964b" # Medium green
+        darkgray: "#84ffa8" # Bright mint
+        dark: "#ddffea" # Pale mint
+        secondary: "#ff47b6" # Vivid magenta
+        highlight: "rgba(255, 71, 182, 0.15)" # Transparent electric pink
 plugins:
   - source: github:quartz-community/created-modified-date
     enabled: true
@@ -109,7 +106,7 @@ plugins:
     enabled: false
     order: 92
   - source: github:quartz-community/fonts
-    enabled: true
+    enabled: false
   - source: github:quartz-community/remove-draft
     enabled: true
   - source: github:quartz-community/explicit-publish
@@ -141,7 +138,7 @@ plugins:
   - source: github:quartz-community/favicon
     enabled: true
   - source: github:quartz-community/og-image
-    enabled: true
+    enabled: false
   - source: github:quartz-community/cname
     enabled: true
   - source: github:quartz-community/canvas-page
@@ -262,7 +259,7 @@ plugins:
       name: quartz-themes
       repo: github:saberzero1/quartz-themes
       subdir: plugin
-    enabled: true
+    enabled: false
     options:
       theme: default
   - source: github:quartz-community/obsidian-plugin-excalidraw
