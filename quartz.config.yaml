@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=./quartz/plugins/quartz-plugins.schema.json
 configuration:
-  pageTitle: "opheliagame's digital garden"
+  pageTitle: opheliagame's digital garden
   pageTitleSuffix: ""
   enableSPA: true
   enablePopovers: true
@@ -16,27 +16,27 @@ configuration:
     fontOrigin: local
     cdnCaching: false
     typography:
-      header: "Basteleur"
-      body: "Sligoil"
-      code: "IBM Plex Mono"
-    colors: 
-      lightMode: 
-        light: "#ebfff0" # Airy mint background
-        lightgray: "#c5ffdb" # Soft lime
-        gray: "#74e291" # Vibrant green
-        darkgray: "#2d9d5c" # Medium emerald
-        dark: "#174029" # Deep forest
-        secondary: "#ff1493" # Deep pink
-        tertiary: "#d373ff" # Bright magenta-purple
-        highlight: "rgba(255, 20, 147, 0.15)" # Transparent deep pink
-      darkMode: 
-        light: "#0c2614" # Rich dark green
-        lightgray: "#1a4027" # Dark emerald
-        gray: "#35964b" # Medium green
-        darkgray: "#84ffa8" # Bright mint
-        dark: "#ddffea" # Pale mint
-        secondary: "#ff47b6" # Vivid magenta
-        highlight: "rgba(255, 71, 182, 0.15)" # Transparent electric pink
+      header: Basteleur
+      body: Sligoil
+      code: IBM Plex Mono
+    colors:
+      lightMode:
+        light: "#ebfff0"
+        lightgray: "#c5ffdb"
+        gray: "#74e291"
+        darkgray: "#2d9d5c"
+        dark: "#174029"
+        secondary: "#ff1493"
+        tertiary: "#d373ff"
+        highlight: rgba(255, 20, 147, 0.15)
+      darkMode:
+        light: "#0c2614"
+        lightgray: "#1a4027"
+        gray: "#35964b"
+        darkgray: "#84ffa8"
+        dark: "#ddffea"
+        secondary: "#ff47b6"
+        highlight: rgba(255, 71, 182, 0.15)
 plugins:
   - source: github:quartz-community/created-modified-date
     enabled: true
@@ -177,6 +177,7 @@ plugins:
     layout:
       position: beforeBody
       priority: 10
+      condition: not-index
   - source: github:quartz-community/content-meta
     enabled: true
     layout:
@@ -204,6 +205,16 @@ plugins:
       position: left
       priority: 35
       group: toolbar
+  - source: github:quartz-community/recent-notes
+    enabled: true
+    options:
+      title: Recently I have been thinking about
+      limit: 10
+      hideFolderPages: true
+    layout:
+      position: beforeBody
+      priority: 25
+      condition: is-index
   - source: github:quartz-community/breadcrumbs
     enabled: true
     layout:
@@ -224,8 +235,6 @@ plugins:
       links:
         GitHub: https://github.com/jackyzha0/quartz
         Discord Community: https://discord.gg/cRFFHYye7t
-  - source: github:quartz-community/recent-notes
-    enabled: false
   - source: github:quartz-community/spacer
     enabled: true
     options: {}
