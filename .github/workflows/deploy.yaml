@@ -27,7 +27,7 @@ jobs:
           # co2-grid-intensity-constant: 472
         continue-on-error: true 
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         id: checkout-step
         with:
           fetch-depth: 0 # Fetch all history for git info
@@ -45,12 +45,12 @@ jobs:
         run: |
           echo "total json: ${{ steps.checkout-step.outputs.data-lap-json }}"
     
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
 
       - name: Cache dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
@@ -58,7 +58,7 @@ jobs:
             ${{ runner.os }}-node-
 
       - name: Cache Quartz plugins
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: .quartz/plugins
           key: ${{ runner.os }}-plugins-${{ hashFiles('quartz.lock.json') }}
@@ -102,7 +102,7 @@ jobs:
           echo "total json: ${{ steps.quartz-build-step.outputs.data-lap-json }}"
       
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: public
 
