@@ -1,0 +1,569 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+
+    <title>5分でわかるFlutterとLottie</title>
+
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/dist/reset.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/dist/reveal.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/dist/theme/white.css"
+    />
+
+    <!-- Theme used for syntax highlighted code -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/plugin/highlight/monokai.css"
+    />
+    <link rel="stylesheet" href="./normalize.css" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <!-- Slide 1: タイトル -->
+        <section class="title-slide">
+          <div class="diagram-row">
+            <div style="padding: 1rem; margin: 0">
+              <p class="eyebrow">5分でわかる</p>
+              <h1>FlutterとLottie</h1>
+              <p class="subtitle">
+                きれいなアニメーションを、どの端末でも同じように動かすには
+              </p>
+              <p class="date">2026/09/29</p>
+              <aside class="notes">
+                今日は、FlutterでLottieを使うときに知っておきたいことを、5分で紹介します。
+              </aside>
+            </div>
+
+            <img src="./assets/dotlottie-flutter.svg" alt="" srcset="" />
+          </div>
+        </section>
+
+        <!-- Slide 2: 自己紹介 -->
+        <section>
+          <p class="eyebrow">自己紹介</p>
+          <h2>アヌシュカ・@opheliagame</h2>
+
+          <ul>
+            <li>2020 卒業</li>
+            <li>Flutter Engineer</li>
+
+            <li>
+              #p5js #Processingが好き。
+              <small
+                ><sup>#つぶやきProcessingは書けないのですが。。</sup></small
+              >
+            </li>
+          </ul>
+          <p class="small-note">
+            <a
+              href="https://x.com/oopheliagame"
+              target="_blank"
+              rel="noreferrer"
+              >X</a
+            >
+            ・
+            <a
+              href="https://github.com/opheliagame/"
+              target="_blank"
+              rel="noreferrer"
+              >GitHub</a
+            >
+          </p>
+          <aside class="notes">
+            アヌシュカです。Flutter
+            Engineerとして、コードで画面を動かしています。Creative codingやlive
+            coding
+            visualsが好きで、動くものや、ちょっと変なものを作っています。今日はその流れでLottieの話をします。
+          </aside>
+        </section>
+
+        <!-- Slide 3: Lottieとは -->
+        <section>
+          <h2>まず、Lottieは何か</h2>
+
+          <div class="definition-row">
+            <div>
+              <p class="lead">
+                <strong>Lottie</strong>は、After
+                EffectsのアニメーションをJSONデータとしてシリアライズし、アプリで再生できるファイル形式です。
+              </p>
+              <br />
+              <p>
+                <strong>名前の由来：</strong>
+                ドイツのアニメーション作家、シャルロッテ・「ロッテ」・ライニガーに由来します。
+              </p>
+            </div>
+            <figure class="history-image">
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/f/fe/Lotte_Reiniger_1939.jpg?utm_source=en.wikipedia.org&amp;utm_campaign=parser&amp;utm_content=thumbnail_unscaled"
+                alt="1939年のロッテ・ライニガー"
+              />
+              <figcaption>Charlotte "Lotte" Reiniger, 1939</figcaption>
+            </figure>
+          </div>
+          <aside class="notes">
+            Lottieは、After
+            EffectsのアニメーションをJSONデータとしてシリアライズして、アプリで再生できるようにするファイル形式です。名前は、シルエットアニメーションの先駆者、ロッテ・ライニガーに由来します。
+          </aside>
+        </section>
+
+        <!-- Slide 4: Lottieの歴史 -->
+        <section>
+          <h2>Lottieのざっくりした歴史</h2>
+          <div class="timeline">
+            <div>
+              <strong>2015</strong
+              ><span
+                >BodymovinがAfter
+                EffectsのアニメーションをJSONに書き出す。</span
+              >
+            </div>
+            <div>
+              <strong>2017</strong
+              ><span
+                >AirbnbがiOS、Android、React
+                Native向けのライブラリを公開。</span
+              >
+            </div>
+            <div>
+              <strong>2018</strong
+              ><span
+                >Microsoftと.NET FoundationがWindows向けライブラリを公開。</span
+              >
+            </div>
+            <div>
+              <strong>2019</strong
+              ><span>Qt、Samsung、Pythonなどにも対応が広がる。</span>
+            </div>
+            <div>
+              <strong>2020</strong
+              ><span>複数のLottieと素材をまとめるdotLottieが登場。</span>
+            </div>
+            <div>
+              <strong>2023</strong><span>ThorVGがLottieの描画に対応。</span>
+            </div>
+            <div>
+              <strong>2024</strong
+              ><span>Lottie Animation Communityが形式の標準化を開始。</span>
+            </div>
+          </div>
+          <aside class="notes">
+            2015年にBodymovinがAfter
+            EffectsからJSONを書き出せるようにしました。その後、Airbnbが各プラットフォーム向けのライブラリを作り、対応が広がりました。2020年にはdotLottieが登場し、今も形式の標準化が進んでいます。
+          </aside>
+        </section>
+
+        <!-- Slide 5: ファイルの種類 -->
+        <section>
+          <h2>ファイルの種類</h2>
+
+          <div>
+            <pre class="mermaid">
+flowchart TD
+  ae["Adobe After Effects"] --> plugin["LottieFiles プラグイン"]
+  plugin --> json[".json"]
+  plugin --> optimizedJson["最適化 .json"]
+  plugin --> lottie[".lottie"]
+  plugin --> optimizedLottie["最適化 .lottie"]
+  json --> flutter["Flutter"]
+  optimizedJson --> flutter
+  lottie --> flutter
+  optimizedLottie --> flutter</pre
+            >
+          </div>
+          <!-- <div class="two-column">
+            <div>
+              <h3>JSON</h3>
+              Lottieは動画ではなく、図形や動きの情報です。元のアニメーションデータから、JSONや.lottie、さらに最適化した形式を書き出せます。再生側が対応している機能だけが正しく動きます。
+                <li>テキストとして読める</li>
+                <li>差分管理しやすい</li>
+                <li>比較的そのまま扱える</li>
+              </ul>
+            </div>
+            <div>
+              <h3>.lottie</h3>
+              <ul>
+                <li>複数のアニメーションを格納</li>
+                <li>画像やフォントもまとめられる</li>
+                <li>配布しやすく最適化しやすい</li>
+              </ul>
+            </div>
+          </div> -->
+          <!-- <p class="callout">
+            便利さの代わりに、再生側が対応している機能かどうかが重要になります。
+          </p> -->
+          <!-- <aside class="notes">
+            Lottieは動画ではなく、図形や動きの情報です。そのため、再生側が対応している機能だけが正しく動きます。
+          </aside> -->
+        </section>
+
+        <!-- Slide 6: Flutterパッケージ -->
+        <section>
+          <h2>Flutterで使うパッケージ</h2>
+          <div class="package-grid">
+            <div class="package-card">
+              <h3>lottie</h3>
+              <p>
+                Airbnbの<a href="https://github.com/airbnb/lottie-android"
+                  ><span>lottie-android</span></a
+                >を元にDart化
+              </p>
+              <p>
+                ベルギーの
+                <a href="https://github.com/xvrh">Xavierさん</a>
+                が個人開発
+              </p>
+
+              <a href="https://pub.dev/packages/lottie" target="_blank">
+                <img src="./assets/pub.dev-lottie.png" alt="" srcset="" />
+              </a>
+
+              <ul style="list-style: none; font-size: 1.5rem">
+                <li>🟢 .json 再生サポート</li>
+                <li>🟡 .lottie 再生サポート</li>
+                <li>🔴 .lottie ステートマシンサポート</li>
+              </ul>
+            </div>
+            <div class="package-card">
+              <h3>dotlottie-flutter</h3>
+
+              <p>
+                <a href="https://startupintros.com/orgs/lottiefiles"
+                  >LottieFiles</a
+                >という会社がオープンソースで開発
+              </p>
+
+              <a
+                href="https://pub.dev/packages/dotlottie_flutter"
+                target="_blank"
+              >
+                <img src="./assets/pub.dev-dotlottie.png" alt="" srcset="" />
+              </a>
+
+              <ul style="list-style: none; font-size: 1.5rem">
+                <li>🟢 .json 再生サポート</li>
+                <li>🟢 .lottie 再生サポート</li>
+                <li>🟢 .lottie ステートマシンサポート</li>
+              </ul>
+            </div>
+          </div>
+          <!-- <p class="small-note">
+            選ぶ基準はファイル形式だけでなく、必要な機能と対象プラットフォームです。
+          </p> -->
+          <aside class="notes">
+            JSONなら基本的な再生、.lottieなら複数の素材をまとめる用途に向いています。形式だけでなく、対応状況で選びます。
+          </aside>
+        </section>
+
+        <!-- Slide 7: Flutterの表示の仕組み -->
+        <section class="visual-slide">
+          <h2>dotlottie_flutterでの表示</h2>
+
+          <ul>
+            <li>ここでは <code>dotlottie_flutter</code> を例にします。</li>
+            <li>Lottieデータを読み込みます。</li>
+            <li>対応する図形や変形を描画します。</li>
+            <li>端末によって、結果が変わることがあります。</li>
+          </ul>
+          <p class="small-note">
+            対応：iOS、Android、macOS、Web、Windows、Linux
+          </p>
+          <small>
+            <ul>
+              <li>
+                <a href="https://github.com/LottieFiles/dotlottie-ios/"
+                  >iOS / macOS</a
+                >
+              </li>
+              <li>
+                <a href="https://github.com/LottieFiles/dotlottie-android/"
+                  >Android</a
+                >
+              </li>
+              <li>
+                <a href="https://github.com/LottieFiles/dotlottie-web">Web</a>
+              </li>
+              <li>
+                Windows / Linux：<a
+                  href="https://github.com/LottieFiles/dotlottie-rs"
+                  >dotlottie-rs（FFI）</a
+                >
+              </li>
+            </ul>
+          </small>
+          <aside class="notes">
+            ここではdotlottie_flutterを例にします。対応はiOS、Android、macOS、Web、Windows、Linuxです。各プラットフォームのネイティブ実装を使います。WindowsとLinuxではdotlottie-rsをFFI経由で使います。
+          </aside>
+        </section>
+
+        <!-- Slide 9: サポートマトリックス -->
+        <section class="support-matrix-slide">
+          <p class="eyebrow">対応状況を確認する</p>
+          <h2>サポートマトリックス</h2>
+          <figure class="support-matrix">
+            <div class="diagram-row">
+              <img
+                src="./assets/lottie-support-matrix-1.png"
+                alt="Lottieの対応機能マトリクス"
+              />
+              <img
+                src="./assets/lottie-support-matrix-2.png"
+                alt="Lottieの対応機能マトリクス"
+              />
+            </div>
+          </figure>
+          <a
+            class="slide-reference"
+            href="https://lottie.airbnb.tech/#/supported-features"
+            target="_blank"
+            rel="noreferrer"
+            >参考: Lottie対応表</a
+          >
+          <aside class="notes">
+            具体的な対応状況は、Lottieの公式サポートマトリクスで確認できます。使いたい機能と対象プラットフォームを、実装前に照らし合わせます。
+          </aside>
+        </section>
+
+        <!-- Slide 8: サポート外の機能 -->
+        <section>
+          <h2>サポート外の機能</h2>
+          <h3>例：自動方向 / Auto Orient</h3>
+
+          <div class="diagram-row">
+            <img
+              src="./assets/auto-orient-wrong.gif"
+              alt=""
+              style="max-height: 18vh"
+            />
+            <img
+              src="./assets/auto-orient-right.gif"
+              alt=""
+              style="max-height: 18vh"
+            />
+          </div>
+
+          <div class="diagram-row">
+            <small>
+              <ul>
+                <li>Web：<span class="good">想定通り</span></li>
+                <li>Android：<span class="warning">サポートなし</span></li>
+                <li>iOS：<span class="warning">サポートなし</span></li>
+              </ul>
+            </small>
+
+            <small>
+              <ul>
+                <li>
+                  <a href="https://github.com/xvrh/lottie-flutter/issues/337"
+                    >Lottie Issue (Open)</a
+                  >
+                </li>
+                <li>
+                  <a href="https://github.com/airbnb/lottie-android/issues/1401"
+                    >Lottie android Issue (Closed)</a
+                  >
+                </li>
+              </ul>
+            </small>
+          </div>
+
+          <p class="callout">
+            「対応しているか」を、プラットフォームごとに確認するのが必要
+          </p>
+          <aside class="notes">
+            例としてAuto Orientを見ます。After
+            Effectsで動いても、再生側が対応していなければ端末で結果が変わります。
+            「対応しているか」を、プラットフォームごとに確認するのが必要
+          </aside>
+        </section>
+
+        <!-- Slide 10: 実装前後のチェック -->
+        <section>
+          <p class="eyebrow">チェックリスト</p>
+          <h2>想定通りに動かすために</h2>
+          <ol class="checklist">
+            <li>
+              <strong>素材作成段階：</strong
+              >サポートマトリックスをデザインと共有
+            </li>
+            <li>
+              <strong>素材取り込み段階：</strong>Web
+              Previewだけでなく、スマホでも確認
+            </li>
+            <li>
+              <strong>想定通りでない場合：</strong
+              >デザイン側と相談し、素材を修正
+            </li>
+            <li>
+              <strong>効率化：</strong
+              >JSONや.lottieを最適化し、読み込みと描画の負荷を下げる
+            </li>
+          </ol>
+          <aside class="notes">
+            実装前に対応状況を確認し、書き出し後は実機で確認します。問題があれば別の表現を検討し、最後に最適化します。
+          </aside>
+        </section>
+
+        <!-- Slide 11: まとめ -->
+        <!-- <section class="end-slide">
+          <p class="eyebrow">まとめ</p>
+          <h2>Lottieは「書き出して終わり」ではない</h2>
+          <p class="lead">
+            デザイン、ファイル形式、再生側の対応状況を一緒に確認すると、アニメーションはもっと安心して使えます。
+          </p>
+          <div class="takeaways">
+            <span>対応状況を確認</span>
+            <span>実機で再生</span>
+            <span>必要なら最適化</span>
+          </div>
+          <p class="question">ご質問はありますか？</p>
+          <aside class="notes">
+            まとめると、Lottieは書き出して終わりではありません。対応状況の確認、実機テスト、必要な最適化が大切です。
+          </aside>
+        </section> -->
+
+        <!-- Slide 12: おわり -->
+        <section class="thank-you-slide">
+          <p class="eyebrow">おわり</p>
+          <h2>ご清聴ありがとうございました</h2>
+          <p class="question">ご質問はありますか？</p>
+          <aside class="notes">
+            これで終わりです。ご清聴ありがとうございました。質問があれば、ぜひ聞いてください。
+          </aside>
+        </section>
+
+        <!-- Slide 13: 参考文献 -->
+        <section class="bibliography-slide">
+          <p class="eyebrow">参考文献</p>
+          <ol class="small-note references">
+            <li>
+              Wikipedia contributors.
+              <a
+                href="https://en.wikipedia.org/wiki/Lottie_(file_format)"
+                target="_blank"
+                rel="noreferrer"
+                ><cite>「Lottie」</cite
+                >（https://en.wikipedia.org/wiki/Lottie_(file_format)）</a
+              >. Wikipedia.<small>（2026年9月29日閲覧）</small>
+            </li>
+            <li>
+              LottieFiles.
+              <a
+                href="https://lottiefiles.github.io/lottie-docs/"
+                target="_blank"
+                rel="noreferrer"
+                ><cite>「Lottie形式のガイド」</cite
+                >（https://lottiefiles.github.io/lottie-docs/）</a
+              >.<small>（2026年9月29日閲覧）</small>
+            </li>
+            <li>
+              LottieFiles.
+              <a
+                href="https://lottiefiles.com/preview"
+                target="_blank"
+                rel="noreferrer"
+                ><cite>「Lottieプレビュー」</cite
+                >（https://lottiefiles.com/preview）</a
+              >.<small>（2026年9月29日閲覧）</small>
+            </li>
+            <li>
+              LottieFiles.
+              <a
+                href="https://lottiefiles.github.io/dotlottie-web/"
+                target="_blank"
+                rel="noreferrer"
+                ><cite>「dotLottie Web」</cite
+                >（https://lottiefiles.github.io/dotlottie-web/）</a
+              >.<small>（2026年9月29日閲覧）</small>
+            </li>
+            <li>
+              LottieFiles.
+              <a
+                href="https://lottiefiles.com/state-machines"
+                target="_blank"
+                rel="noreferrer"
+                ><cite>「ステートマシン」</cite
+                >（https://lottiefiles.com/state-machines）</a
+              >.<small>（2026年9月29日閲覧）</small>
+            </li>
+            <li>
+              dotLottie.
+              <a
+                href="https://dotlottie.io/spec/2.0/"
+                target="_blank"
+                rel="noreferrer"
+                ><cite>「仕様 2.0」</cite>（https://dotlottie.io/spec/2.0/）</a
+              >.<small>（2026年9月29日閲覧）</small>
+            </li>
+          </ol>
+          <aside class="notes">Lottieの形式や歴史を確認できる資料です。</aside>
+        </section>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/dist/reveal.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/plugin/notes/notes.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/plugin/markdown/markdown.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/plugin/highlight/highlight.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+    <script>
+      // More info about initialization & config:
+      // - https://revealjs.com/initialization/
+      // - https://revealjs.com/config/
+      Reveal.initialize({
+        hash: true,
+        transition: "fade",
+        transitionSpeed: "fast",
+
+        // Learn about plugins: https://revealjs.com/plugins/
+        plugins: [RevealMarkdown, RevealHighlight, RevealNotes],
+      });
+
+      document
+        .querySelectorAll(".reveal .slides > section")
+        .forEach((section, index) => {
+          if (index < 1 || index > 2 || section.querySelector(".references"))
+            return;
+
+          const reference = document.createElement("a");
+          reference.className = "slide-reference";
+          reference.href = "https://en.wikipedia.org/wiki/Lottie_(file_format)";
+          reference.target = "_blank";
+          reference.rel = "noreferrer";
+          reference.textContent = "参考: Lottie (Wikipedia)";
+          section.append(reference);
+        });
+
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: "base",
+        themeVariables: {
+          background: "#ebfff0",
+          primaryColor: "#c5ffdb",
+          primaryTextColor: "#174029",
+          primaryBorderColor: "#ff1493",
+          lineColor: "#2d9d5c",
+          secondaryColor: "#74e291",
+          tertiaryColor: "#d373ff",
+          edgeLabelBackground: "#ebfff0",
+          fontFamily: "Sligoil, ui-sans-serif, system-ui, sans-serif",
+        },
+      });
+      mermaid.run();
+    </script>
+  </body>
+</html>
