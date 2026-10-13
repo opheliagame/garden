@@ -1,0 +1,928 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flutter省電力設計: 重いWidget編（仮）</title>
+
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/dist/reset.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/dist/reveal.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/dist/theme/white.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=JetBrains+Mono:wght@400;600;700&amp;display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <link rel="stylesheet" href="./normalize.css" />
+    <link rel="stylesheet" href="./style.css" />
+
+    <style>
+      :root {
+        --r-main-font: "Plus Jakarta Sans", sans-serif;
+        --r-heading-font: "Plus Jakarta Sans", sans-serif;
+        --r-code-font: "JetBrains Mono", monospace;
+        --talk-primary: #2d9d5c;
+        --talk-success: #237445;
+        --talk-warning: #9b39c9;
+        --talk-danger: #ff1493;
+        --talk-info: #818cf8;
+        --talk-muted: #527d60;
+        --talk-copy: #285a3a;
+        --talk-subtle: #527d60;
+      }
+
+      .reveal {
+        font-family: var(--r-main-font);
+        font-size: 24px;
+      }
+
+      .reveal h1,
+      .reveal h2,
+      .reveal h3,
+      .reveal h4 {
+        font-family: var(--r-heading-font);
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        text-transform: none;
+      }
+
+      .reveal .slides > section {
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+
+      .reveal .slides section {
+        background-color: transparent !important;
+      }
+
+      .reveal .slides p,
+      .reveal .slides li {
+        text-shadow: none;
+      }
+
+      .reveal pre code {
+        border-radius: 8px;
+        font-size: 0.75em !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+
+        <!-- Slide 1: Title -->
+        <section class="title-slide">
+          <span class="badge badge-primary">temporary deck</span>
+          <h1 class="heading-hero">
+            Flutter省電力設計<br /><span class="hero-highlight">重いWidget編（仮）</span>
+          </h1>
+          <aside class="notes">
+            <h3>タイトル</h3>
+            <ul>
+              <li>これは widget 個別 deep dive 用の別ファイル</li>
+              <li>BackdropFilter や Opacity などをまとめて見る</li>
+            </ul>
+          </aside>
+          <p class="hero-subtitle">BackdropFilter / ShaderMask / ClipRRect / Opacity / 常時ループ演出</p>
+          <p class="hero-meta">temporary split deck</p>
+        </section>
+
+
+        <!-- Slide 8: Offscreen Rendering -->
+        <section>
+          <span class="badge badge-danger">GPU ボトルネック</span>
+          <h2>要注意：オフスクリーン描画 (saveLayer)</h2>
+          <aside class="notes">
+            <h3>要注意：オフスクリーン描画 (saveLayer)</h3>
+            <ul>
+              <li>ここからは重くなりやすい実装の話</li>
+              <li>saveLayer は中間バッファを使う</li>
+              <li>見た目はきれいでも mobile では高いことがある</li>
+            </ul>
+          </aside>
+          <div class="grid-2 mt-lg">
+            <div class="card card-danger">
+              <h3 class="text-danger">saveLayer() の代償</h3>
+              <p class="soft-danger">別バッファへのテクスチャ退避処理</p>
+              <p>
+                毎フレーム、GPUバッファの確保・クリア・テクスチャ書き戻しが発生し、VRAM帯域と電力を極度に消費します。
+              </p>
+            </div>
+            <div class="stack-md">
+              <div class="card">
+                <h4>BackdropFilter</h4>
+                <p>背面の全ピクセルを読み出してガウスぼかしを計算</p>
+              </div>
+              <div class="card">
+                <h4>ShaderMask</h4>
+                <p>合成用の中間サーフェスを強制生成</p>
+              </div>
+              <div class="card">
+                <h4>ClipRRect (clipBehavior)</h4>
+                <p>
+                  <code>antiAliasWithSaveLayer</code>
+                  指定による強制オフスクリーン
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Slide 8a: BackdropFilter Deep Dive -->
+        <section>
+          <span class="badge badge-danger">GPU詳細解析 (1/3)</span>
+          <h2>BackdropFilter: すりガラス効果の代償</h2>
+          <aside class="notes">
+            <h3>BackdropFilter: すりガラス効果の代償</h3>
+            <ul>
+              <li>blur は見た目のわりに高い</li>
+              <li>スクロール中だと特につらい</li>
+              <li>代替できるなら置き換えたい</li>
+            </ul>
+          </aside>
+          <div class="grid-2 mt-lg">
+            <div class="card">
+              <h4>
+                <i
+                  class="fa-solid fa-cogs icon-leading icon-danger"
+                ></i
+                >処理メカニズム
+              </h4>
+              <ul>
+                <li>
+                  <b>全画面コピー:</b>
+                  描画済みフレームのピクセルを別VRAMバッファへコピー
+                </li>
+                <li>
+                  <b>2パス・ガウス処理:</b> 水平・垂直方向への畳み込み演算を実施
+                </li>
+                <li>
+                  <b>タイルキャッシュの破棄:</b> モバイルGPU（Tile-Based
+                  Rendering）のメモリ帯域を枯渇させる
+                </li>
+              </ul>
+            </div>
+            <div class="card">
+              <h4>
+                <i
+                  class="fa-solid fa-shield-halved icon-leading icon-success"
+                ></i
+                >対策と代替アプローチ
+              </h4>
+              <ul>
+                <li>
+                  <b>スクロール中の無効化:</b> リスト高速移動時は BackdropFilter
+                  を一時的に外す
+                </li>
+                <li>
+                  <b>静的テクスチャ代替:</b>
+                  透過率を調整した高輝度単色レイヤー（<code>Color(0xDDFFFFFF)</code>）を重ねる
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- Slide 9c: Before / After - BackdropFilter -->
+        <section>
+          <span class="badge badge-primary">ウィジェット改善 (3/5)</span>
+          <h2>Before / After: BackdropFilter</h2>
+          <aside class="notes">
+            <h3>Before / After: BackdropFilter</h3>
+            <ul>
+              <li>左は本物の blur</li>
+              <li>右は雰囲気だけ残す軽い方法</li>
+              <li>見た目とコストのバランスを見る</li>
+            </ul>
+          </aside>
+          <div class="grid-2 mt-md">
+            <div class="card card-danger">
+              <span class="badge badge-danger"
+                >BEFORE: 全画面ピクセル読み戻し</span
+              >
+              <pre><code class="language-dart">class FrostedHeader extends StatelessWidget {
+  const FrostedHeader({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+        child: Container(color: Colors.white.withOpacity(0.1)),
+      ),
+    );
+  }
+}</code></pre>
+              <p class="soft-danger">
+                モバイルGPUタイルキャッシュ無効化＋2パスガウスぼかし
+              </p>
+            </div>
+            <div class="card card-success">
+              <span class="badge badge-success">AFTER: 擬似すりガラス質感</span>
+              <pre><code class="language-dart">class FauxFrostedHeader extends StatelessWidget {
+  const FauxFrostedHeader({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xDDFFFFFF),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0x33FFFFFF)),
+      ),
+      child: const SizedBox(height: 88, width: double.infinity),
+    );
+  }
+}</code></pre>
+              <p class="soft-success">
+                シェーダー計算ゼロ。高速スクロール時も発熱なし
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Slide 9c2: BackdropFilter Profiling Placeholder -->
+        <section>
+          <span class="badge badge-primary">profiling</span>
+          <h2>Before / After の計測スクショ</h2>
+          <p class="lead">
+            ここに BackdropFilter の before / after の profiler スクショを入れて、
+            before の重さが見えるようにする予定です。
+          </p>
+          <div class="grid-2 mt-lg">
+            <div class="placeholder-frame">
+              <strong>Before</strong>
+              <span>重いぼかしありの計測スクショを入れる</span>
+            </div>
+            <div class="placeholder-frame">
+              <strong>After</strong>
+              <span>置き換え後の軽い状態のスクショを入れる</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Slide 8b: ShaderMask Deep Dive -->        <section>
+          <span class="badge badge-danger">GPU詳細解析 (2/3)</span>
+          <h2>ShaderMask: 中間サーフェスの強制確保</h2>
+          <aside class="notes">
+            <h3>ShaderMask: 中間サーフェスの強制確保</h3>
+            <ul>
+              <li>ShaderMask も一度別に描いてから合成する</li>
+              <li>大きい list にかけると重くなりやすい</li>
+              <li>overlay で代用できることも多い</li>
+            </ul>
+          </aside>
+          <div class="grid-2 mt-lg">
+            <div class="card">
+              <h4>
+                <i
+                  class="fa-solid fa-layer-group icon-leading icon-danger"
+                ></i
+                >処理メカニズム
+              </h4>
+              <ul>
+                <li>
+                  <b>子ツリーの隔離描画:</b>
+                  影響下のすべてのWidgetを一旦オフスクリーンキャンバスに描画
+                </li>
+                <li>
+                  <b>アルファマスク合成:</b>
+                  指定されたシェーダー（グラデーション等）とピクセル単位でブレンド処理
+                </li>
+                <li>
+                  <b>アニメーション時のバッファ再確保:</b>
+                  サイズ変更のたびにテクスチャメモリを頻繁に確保・解放
+                </li>
+              </ul>
+            </div>
+            <div class="card">
+              <h4>
+                <i
+                  class="fa-solid fa-shield-halved icon-leading icon-success"
+                ></i
+                >対策と代替アプローチ
+              </h4>
+              <ul>
+                <li>
+                  <b>最前面オーバーレイ:</b>
+                  グラデーション透過画像を最前面に置く
+                  <code>Stack</code> 構成へ変更
+                </li>
+                <li>
+                  <b>IgnorePointer の組み合わせ:</b>
+                  タッチイベントを透過させた静的グラデーションコンテナの配置
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- Slide 9d: Before / After - ShaderMask -->
+        <section>
+          <span class="badge badge-primary">ウィジェット改善 (4/5)</span>
+          <h2>Before / After: ShaderMask</h2>
+          <aside class="notes">
+            <h3>Before / After: ShaderMask</h3>
+            <ul>
+              <li>左は mask で全部まとめて処理</li>
+              <li>右は上に薄い layer を置くだけ</li>
+              <li>操作感が変わらないかも確認する</li>
+            </ul>
+          </aside>
+          <div class="grid-2 mt-md">
+            <div class="card card-danger">
+              <span class="badge badge-danger"
+                >BEFORE: 中間サーフェス強制確保</span
+              >
+              <pre><code class="language-dart">class MaskedFeed extends StatelessWidget {
+  const MaskedFeed({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ShaderMask(
+      shaderCallback: (bounds) =&gt; linearGradient.createShader(bounds),
+      blendMode: BlendMode.dstIn,
+      child: ListView.builder(
+        itemCount: 30,
+        itemBuilder: (_, i) =&gt; ListTile(title: Text('Item $i')),
+      ),
+    );
+  }
+}</code></pre>
+              <p class="soft-danger">
+                子ツリー全体を隔離レンダリングしてピクセル合成
+              </p>
+            </div>
+            <div class="card card-success">
+              <span class="badge badge-success">AFTER: Stack オーバーレイ</span>
+              <pre><code class="language-dart">class OverlayFeed extends StatelessWidget {
+  const OverlayFeed({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        ListView.builder(
+          itemCount: 30,
+          itemBuilder: (_, i) =&gt; ListTile(title: Text('Item $i')),
+        ),
+        const IgnorePointer(child: TopBottomFadeOverlay()),
+      ],
+    );
+  }
+}</code></pre>
+              <p class="soft-success">
+                通常レイヤー描画のみで完結。中間バッファ不要
+              </p>
+            </div>
+          </div>
+        </section>
+
+                <!-- Slide 9d2: ShaderMask Profiling Placeholder -->
+        <section>
+          <span class="badge badge-primary">profiling</span>
+          <h2>Before / After の計測スクショ</h2>
+          <p class="lead">
+            ここに ShaderMask の before / after の計測スクショを入れて、
+            中間サーフェスの重さが見えるようにする予定です。
+          </p>
+          <div class="grid-2 mt-lg">
+            <div class="placeholder-frame">
+              <strong>Before</strong>
+              <span>mask ありの重い状態のスクショを入れる</span>
+            </div>
+            <div class="placeholder-frame">
+              <strong>After</strong>
+              <span>overlay 化した後のスクショを入れる</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Slide 8c: ClipRRect Deep Dive -->
+        <section>
+          <span class="badge badge-danger">GPU詳細解析 (3/3)</span>
+          <h2>ClipRRect: クリップ挙動と saveLayer の罠</h2>
+          <aside class="notes">
+            <h3>ClipRRect: クリップ挙動と saveLayer の罠</h3>
+            <ul>
+              <li>角丸だからといって全部高いわけではない</li>
+              <li><code>antiAliasWithSaveLayer</code> は特に注意</li>
+              <li>普通は <code>antiAlias</code> で足りることが多い</li>
+            </ul>
+          </aside>
+          <div class="grid-2 mt-lg">
+            <div class="card">
+              <h4>
+                <i
+                  class="fa-solid fa-scissors icon-leading icon-warning"
+                ></i
+                >3つの clipBehavior の相違
+              </h4>
+              <ul>
+                <li>
+                  <b>Clip.hardEdge:</b>
+                  最速。アンチエイリアスなし、オフスクリーン処理なし（極めて省電力）
+                </li>
+                <li>
+                  <b>Clip.antiAlias:</b>
+                  標準推奨。ステンシルバッファを利用し高速にアンチエイリアス処理
+                </li>
+                <li>
+                  <b>antiAliasWithSaveLayer:</b>
+                  <b>極めて危険</b>。境界の滲みを防ぐため強制的に
+                  <code>saveLayer</code> を起動
+                </li>
+              </ul>
+            </div>
+            <div class="card">
+              <h4>
+                <i
+                  class="fa-solid fa-lightbulb icon-leading icon-primary"
+                ></i
+                >実務での選択基準
+              </h4>
+              <ul>
+                <li>
+                  <code>antiAliasWithSaveLayer</code>
+                  は特殊な背景重ね合わせ時以外<b>使用禁止</b>に指定
+                </li>
+                <li>
+                  角丸コンテナ画像等は描画時にあらかじめ切り抜いた画像リソースを利用してクリップ自体を回避
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- Slide 9a: Before / After - ClipRRect -->
+        <section>
+          <span class="badge badge-primary">ウィジェット改善 (1/5)</span>
+          <h2>Before / After: ClipRRect</h2>
+          <aside class="notes">
+            <h3>Before / After: ClipRRect</h3>
+            <ul>
+              <li>見た目はかなり近い</li>
+              <li>でも内部コストは違う</li>
+              <li>問題なければ軽い方を選ぶ</li>
+            </ul>
+          </aside>
+          <div class="grid-2 mt-md">
+            <div class="card card-danger">
+              <span class="badge badge-danger"
+                >BEFORE: antiAliasWithSaveLayer</span
+              >
+              <pre><code class="language-dart">class ExpensiveCard extends StatelessWidget {
+  const ExpensiveCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      clipBehavior: Clip.antiAliasWithSaveLayer,
+      borderRadius: BorderRadius.circular(16),
+      child: Image.network(
+        'https://picsum.photos/600/320',
+        fit: BoxFit.cover,
+      ),
+    );
+  }
+}</code></pre>
+              <p class="soft-danger">
+                境界の滲みを防ぐため saveLayer が発生
+              </p>
+            </div>
+            <div class="card card-success">
+              <span class="badge badge-success"
+                >AFTER: antiAlias で直接クリップ</span
+              >
+              <pre><code class="language-dart">class EfficientCard extends StatelessWidget {
+  const EfficientCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      clipBehavior: Clip.antiAlias,
+      borderRadius: BorderRadius.circular(16),
+      child: Image.network(
+        'https://picsum.photos/600/320',
+        fit: BoxFit.cover,
+      ),
+    );
+  }
+}</code></pre>
+              <p class="soft-success">
+                中間バッファを避けて角丸の見た目を維持
+              </p>
+            </div>
+          </div>
+        </section>
+
+                <!-- Slide 9a2: ClipRRect Profiling Placeholder -->
+        <section>
+          <span class="badge badge-primary">profiling</span>
+          <h2>Before / After の計測スクショ</h2>
+          <p class="lead">
+            ここに ClipRRect の before / after の計測スクショを入れて、
+            saveLayer あり / なしの差を見せる予定です。
+          </p>
+          <div class="grid-2 mt-lg">
+            <div class="placeholder-frame">
+              <strong>Before</strong>
+              <span>antiAliasWithSaveLayer のスクショを入れる</span>
+            </div>
+            <div class="placeholder-frame">
+              <strong>After</strong>
+              <span>antiAlias にした後のスクショを入れる</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Slide 8d: Opacity Deep Dive -->
+        <section>
+          <span class="badge badge-primary">GPU詳細解析 (4/4)</span>
+          <h2>Opacity: 便利な透過処理のコスト</h2>
+          <aside class="notes">
+            <h3>Opacity: 便利な透過処理のコスト</h3>
+            <ul>
+              <li>Opacity が always bad ではない</li>
+              <li>でも大きい動く領域では疑いたい</li>
+              <li>直接 alpha を入れられるか考える</li>
+            </ul>
+          </aside>
+          <div class="grid-2 mt-lg">
+            <div class="card">
+              <h4>
+                <i
+                  class="fa-solid fa-layer-group icon-leading icon-danger"
+                ></i
+                >処理メカニズム
+              </h4>
+              <ul>
+                <li>
+                  <b>子ツリーの隔離描画:</b>
+                  複数の子Widgetを一度バッファへ描画してから透明度を適用
+                </li>
+                <li>
+                  <b>中間サーフェスの合成:</b>
+                  大きな領域や複雑な子ツリーでは追加のメモリ帯域とGPU処理が発生
+                </li>
+                <li>
+                  <b>アニメーション時の負荷:</b>
+                  透明度を毎フレーム変えると、隔離描画と合成が継続して実行される
+                </li>
+              </ul>
+            </div>
+            <div class="card">
+              <h4>
+                <i
+                  class="fa-solid fa-shield-halved icon-leading icon-success"
+                ></i
+                >対策と使い分け
+              </h4>
+              <ul>
+                <li>
+                  <b>単一の色やText:</b>
+                  <code>Color.withValues(alpha: ...)</code>
+                  などで直接アルファを指定
+                </li>
+                <li>
+                  <b>静的な小領域:</b> 見た目と計測結果を確認したうえで Opacity
+                  を利用
+                </li>
+                <li>
+                  <b>大きなスクロール領域:</b>
+                  透過アニメーションを避け、必要なら可視状態に連動して停止
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="callout">
+            <i class="fa-solid fa-lightbulb"></i>
+            <b>判断基準:</b> Opacity
+            が常に悪いわけではありません。大きな動的ツリーを毎フレーム合成するケースをまず疑い、直接アルファで表現できる部分だけ置き換えます。
+          </div>
+        </section>
+
+        <!-- Slide 9b: Before / After - Opacity -->
+        <section>
+          <span class="badge badge-primary">ウィジェット改善 (2/5)</span>
+          <h2>Before / After: Opacity</h2>
+          <aside class="notes">
+            <h3>Before / After: Opacity</h3>
+            <ul>
+              <li>文字だけなら色に alpha を入れればよい</li>
+              <li>小さい差に見えて、合成が減る</li>
+              <li>見た目が同じか最後に確認する</li>
+            </ul>
+          </aside>
+          <div class="grid-2 mt-md">
+            <div class="card card-danger">
+              <span class="badge badge-danger">BEFORE: Opacity で合成</span>
+              <pre><code class="language-dart">class FadedTitle extends StatelessWidget {
+  const FadedTitle({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Opacity(
+      opacity: 0.5,
+      child: Text(
+        '省電力設計',
+        style: TextStyle(fontSize: 32, color: Colors.black),
+      ),
+    );
+  }
+}</code></pre>
+              <p class="soft-danger">
+                子ツリーを中間バッファへ描画してから透過合成
+              </p>
+            </div>
+            <div class="card card-success">
+              <span class="badge badge-success"
+                >AFTER: 色のアルファ値で描画</span
+              >
+              <pre><code class="language-dart">class EfficientTitle extends StatelessWidget {
+  const EfficientTitle({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      '省電力設計',
+      style: TextStyle(
+        fontSize: 32,
+        color: Colors.black.withValues(alpha: 0.5),
+      ),
+    );
+  }
+}</code></pre>
+              <p class="soft-success">
+                同一キャンバスへ直接描画して余分な合成を回避
+              </p>
+            </div>
+          </div>
+        </section>
+
+                <!-- Slide 9b2: Opacity Profiling Placeholder -->
+        <section>
+          <span class="badge badge-primary">profiling</span>
+          <h2>Before / After の計測スクショ</h2>
+          <p class="lead">
+            ここに Opacity の before / after の計測スクショを入れて、
+            合成コストの差が見えるようにする予定です。
+          </p>
+          <div class="grid-2 mt-lg">
+            <div class="placeholder-frame">
+              <strong>Before</strong>
+              <span>Opacity 合成ありのスクショを入れる</span>
+            </div>
+            <div class="placeholder-frame">
+              <strong>After</strong>
+              <span>直接 alpha 指定にした後のスクショを入れる</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Slide 9e: Animation Loop Deep Dive -->
+        <section>
+          <span class="badge badge-primary">CPU / Ticker 制御</span>
+          <h2>常時ループ演出: 見えていなくても電池を使う</h2>
+          <aside class="notes">
+            <h3>常時ループ演出: 見えていなくても電池を使う</h3>
+            <ul>
+              <li>ここは saveLayer とは別のタイプの無駄</li>
+              <li>画面外でも animation が回り続けることがある</li>
+              <li>見えていないなら止める、が基本</li>
+            </ul>
+          </aside>
+          <div class="grid-2 mt-lg">
+            <div class="card">
+              <h4>
+                <i class="fa-solid fa-rotate icon-leading icon-danger"></i
+                >何が起こるか
+              </h4>
+              <ul>
+                <li><b>Ticker が継続:</b> 無操作でも vsync に合わせて動き続ける</li>
+                <li><b>毎フレーム再描画:</b> shimmer や loading 演出がずっと仕事する</li>
+                <li><b>積み上がる消費:</b> 1個は小さくても、list 全体だと効いてくる</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h4>
+                <i class="fa-solid fa-circle-pause icon-leading icon-success"></i
+                >どう止めるか
+              </h4>
+              <ul>
+                <li><b>可視性で制御:</b> 画面内にある時だけ再開する</li>
+                <li><b>ライフサイクルで停止:</b> 背景に行ったら止める</li>
+                <li><b>理想:</b> idle 時は描画がしっかり止まる状態にする</li>
+              </ul>
+            </div>
+          </div>
+          <div class="callout">
+            <b>ポイント:</b> energy の改善では、速く描くより
+            <b>描かなくていい時に止まる</b>ほうが効くことがあります。
+          </div>
+        </section>
+
+        <!-- Slide 9f: Before / After - Animation Loop -->
+        <section>
+          <span class="badge badge-primary">ウィジェット改善 (5/5)</span>
+          <h2>Before / After: 常時ループ演出</h2>
+          <aside class="notes">
+            <h3>Before / After: 常時ループ演出</h3>
+            <ul>
+              <li>見えていない animation は止めたい</li>
+              <li>見えた時だけ動かす</li>
+              <li>idle ではちゃんと止まるのが理想</li>
+            </ul>
+          </aside>
+          <div class="grid-2 mt-md">
+            <div class="card card-danger">
+              <span class="badge badge-danger">BEFORE: 画面外でも常時稼働</span>
+              <pre><code class="language-dart">class ShimmerTileState extends State&lt;ShimmerTile&gt;
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this);
+    _controller.repeat();
+  }
+}</code></pre>
+              <p class="soft-danger">
+                無操作中も vsync が回り続け、毎秒60〜120回再描画
+              </p>
+            </div>
+            <div class="card card-success">
+              <span class="badge badge-success"
+                >AFTER: 可視性連動でTicker停止</span
+              >
+              <pre><code class="language-dart">VisibilityDetector(
+  key: const Key('shimmer_item'),
+  onVisibilityChanged: (info) {
+    if (info.visibleFraction > 0) {
+      _controller.repeat();
+    } else {
+      _controller.stop();
+    }
+  },
+  child: const ShimmerEffect(),
+)</code></pre>
+              <p class="soft-success">
+                見えている瞬間だけ滑らかに駆動。画面外では完全静止
+              </p>
+            </div>
+          </div>
+        </section>
+
+                <!-- Slide 9f2: Animation Loop Profiling Placeholder -->
+        <section>
+          <span class="badge badge-primary">profiling</span>
+          <h2>Before / After の計測スクショ</h2>
+          <p class="lead">
+            ここに 常時ループ演出 の before / after の計測スクショを入れて、
+            idle 時にも動き続ける重さを見せる予定です。
+          </p>
+          <div class="grid-2 mt-lg">
+            <div class="placeholder-frame">
+              <strong>Before</strong>
+              <span>画面外でも動き続ける状態のスクショを入れる</span>
+            </div>
+            <div class="placeholder-frame">
+              <strong>After</strong>
+              <span>停止できている状態のスクショを入れる</span>
+            </div>
+          </div>
+        </section>
+          </div>
+    </div>
+
+    <!-- Reveal.js and Prism.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/notes/notes.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-dart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script>
+      const slideSources = [
+        [],
+        [
+          ["Canvas.saveLayer", "https://api.flutter.dev/flutter/dart-ui/Canvas/saveLayer.html"],
+        ],
+        [
+          ["BackdropFilter API", "https://api.flutter.dev/flutter/widgets/BackdropFilter-class.html"],
+        ],
+        [
+          ["BackdropFilter API", "https://api.flutter.dev/flutter/widgets/BackdropFilter-class.html"],
+        ],
+        [
+          ["Flutter performance profiling", "https://docs.flutter.dev/perf/ui-performance"],
+          ["BackdropFilter API", "https://api.flutter.dev/flutter/widgets/BackdropFilter-class.html"],
+        ],
+        [
+          ["ShaderMask API", "https://api.flutter.dev/flutter/widgets/ShaderMask-class.html"],
+        ],
+        [
+          ["ShaderMask API", "https://api.flutter.dev/flutter/widgets/ShaderMask-class.html"],
+        ],
+        [
+          ["Flutter performance profiling", "https://docs.flutter.dev/perf/ui-performance"],
+          ["ShaderMask API", "https://api.flutter.dev/flutter/widgets/ShaderMask-class.html"],
+        ],
+        [
+          ["ClipRRect API", "https://api.flutter.dev/flutter/widgets/ClipRRect-class.html"],
+          ["Clip behavior", "https://api.flutter.dev/flutter/dart-ui/Clip.html"],
+        ],
+        [
+          ["ClipRRect API", "https://api.flutter.dev/flutter/widgets/ClipRRect-class.html"],
+          ["Clip behavior", "https://api.flutter.dev/flutter/dart-ui/Clip.html"],
+        ],
+        [
+          ["Flutter performance profiling", "https://docs.flutter.dev/perf/ui-performance"],
+          ["Clip behavior", "https://api.flutter.dev/flutter/dart-ui/Clip.html"],
+        ],
+        [
+          ["Opacity API", "https://api.flutter.dev/flutter/widgets/Opacity-class.html"],
+        ],
+        [
+          ["Opacity API", "https://api.flutter.dev/flutter/widgets/Opacity-class.html"],
+        ],
+        [
+          ["Flutter performance profiling", "https://docs.flutter.dev/perf/ui-performance"],
+          ["Opacity API", "https://api.flutter.dev/flutter/widgets/Opacity-class.html"],
+        ],
+        [
+          ["Flutter animations", "https://docs.flutter.dev/ui/animations"],
+          ["TickerMode API", "https://api.flutter.dev/flutter/widgets/TickerMode-class.html"],
+          ["AppLifecycleState", "https://api.flutter.dev/flutter/dart-ui/AppLifecycleState.html"],
+        ],
+        [
+          ["Flutter animations", "https://docs.flutter.dev/ui/animations"],
+        ],
+        [
+          ["Flutter performance profiling", "https://docs.flutter.dev/perf/ui-performance"],
+          ["Flutter animations", "https://docs.flutter.dev/ui/animations"],
+        ],
+      ];
+
+      const renderSources = (sources) =>
+        sources
+          .map(
+            ([label, url]) =>
+              `<a href="${url}" target="_blank" rel="noopener noreferrer">${label}</a>`,
+          )
+          .join(" · ");
+
+      document.querySelectorAll(".slides > section").forEach((section, index) => {
+        const sources = slideSources[index] || [];
+        if (!sources.length) return;
+
+        const notes = section.querySelector(":scope > aside.notes");
+        const sourceNode = document.createElement("div");
+        sourceNode.className = "slide-sources";
+        sourceNode.innerHTML = `参考: ${renderSources(sources)}`;
+
+        if (notes) {
+          section.insertBefore(sourceNode, notes);
+        } else {
+          section.appendChild(sourceNode);
+        }
+      });
+
+      Prism.highlightAll();
+
+      Reveal.initialize({
+        width: 1280,
+        height: 720,
+        margin: 0.08,
+        hash: true,
+        slideNumber: "c/t",
+        controls: true,
+        progress: true,
+        center: true,
+        // Transition Settings
+        transition: "fade",
+        transitionSpeed: "fast",
+        plugins: [RevealNotes],
+      });
+    </script>
+  </body>
+</html>
