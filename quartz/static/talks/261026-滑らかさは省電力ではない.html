@@ -5,14 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>「滑らかさ」の先へ：Flutterアプリの省電力設計</title>
 
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/dist/reset.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/dist/reveal.css"
-    />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/dist/reset.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/dist/reveal.css" />
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/dist/theme/white.css"
@@ -69,6 +63,11 @@
         height: 100%;
       }
 
+      .reveal .slides > section > h2 {
+        border-left: 0;
+        padding-left: 0;
+      }
+
       .reveal .slides section {
         background-color: transparent !important;
       }
@@ -87,31 +86,34 @@
   <body>
     <div class="reveal">
       <div class="slides">
-
         <!-- Slide 1: Title -->
         <section>
-          <span class="badge badge-primary"
-            >FLUTTER ARCHITECTURE &amp; PERFORMANCE</span
-          >
+          <span class="badge badge-primary">FLUTTER ARCHITECTURE &amp; PERFORMANCE</span>
           <h1 class="heading-hero">
-            「滑らかさ」の先へ<br /><span class="hero-highlight"
-              >Flutterアプリの省電力設計</span
-            >
+            「滑らかさ」の先へ<br /><span class="hero-highlight">Flutterアプリの省電力設計</span>
           </h1>
           <aside class="notes">
             <h3>タイトル</h3>
             <ul>
               <li>今日は <code>speed</code> ではなく <code>energy</code> の話</li>
               <li>カクつかない、だけでは足りない</li>
-              <li>電池・発熱・GPU負荷も一緒に見る</li>
+              <li>電池（でんち）・発熱（はつねつ）・GPU負荷（ふか）も一緒に見る</li>
             </ul>
           </aside>
           <p class="hero-subtitle">
             快適な操作感の裏にある「バッテリー消費」「GPU負荷」「端末の発熱」を見直す
           </p>
-          <p class="hero-meta">
-            github.com/flutter/flutter • label:perf:energy
-          </p>
+          <p class="hero-meta">github.com/flutter/flutter • label:perf:energy</p>
+        </section>
+
+        <section>
+          <p>事項紹介</p>
+
+          <ul>
+            <p>インド出身</p>
+            <p>Flutter Engineer・5年目</p>
+            <p>Graphicプログラミングが好き。p5.js、GLSLなどを書いています</p>
+          </ul>
         </section>
 
         <!-- Slide 2: The Illusion of Smoothness -->
@@ -121,7 +123,7 @@
           <aside class="notes">
             <h3>Flutterでパフォーマンスを考える時にまず見るページ</h3>
             <ul>
-              <li>まずこの公式ページを見る人が多い</li>
+              <li>まずこの公式（こうしき）ページを見る人が多い</li>
               <li>自分もまずここを開く</li>
               <li>でも today はこの中の energy を拾いたい</li>
             </ul>
@@ -142,12 +144,19 @@
           <span class="badge badge-primary">前提</span>
           <h2>Performance は1つではない</h2>
           <aside class="notes">
-            <h3>Performance は1つではない</h3>
+            <h3>Performance は1つではない。あなたのアプリのTechnical Qualityはどうですか</h3>
             <ul>
               <li>performance = speed だけではない</li>
               <li>memory、app size、energy もある</li>
               <li>今日は energy にだけ絞る</li>
             </ul>
+
+            <p>
+              メモリの場合は、皆さんもあったと思いますが、AI開発（かいはつ）でパソコンがメモリ不足（ぶそく）して落ちたことありますかね
+              。同じようにアプリが使ったいるメモリが大きすぎて、端末（たんまつ）メモリ不足（ぶそく）が起きるとクラッシュするので、あまり良くないところです
+            </p>
+
+            <p>size。自分はサイズが大きくてアプリを消したことありますが、皆さんどうですか</p>
           </aside>
           <div class="grid-2 mt-lg">
             <div class="card">
@@ -184,22 +193,26 @@
             <h3>GitHubラベル: perf: energy</h3>
             <ul>
               <li>Flutter の issue にもこのラベルがある</li>
-              <li>つまり公式側でもちゃんとテーマになっている</li>
-              <li>後で見ると面白い issue が多い</li>
+              <li>つまり公式側（こうしきがわ）でもちゃんとテーマになっている</li>
+              <li>後（あと）で見ると面白い（おもしろい） issue が多い</li>
             </ul>
           </aside>
-          <p class="lead">
-            Flutter の issue tracker にも、energy 専用のラベルがあります。
-          </p>
+          <p class="lead">Flutter の issue tracker にも、energy 専用のラベルがあります。</p>
           <figure class="support-matrix">
             <img
               src="./assets/261026/github.com-flutter-flutter-issues.png"
               alt="Flutter perf energy issues"
             />
           </figure>
-          <div class="callout">
-            ここはいろいろな話があるので、後でゆっくり見ると面白いです。
-          </div>
+          <div class="callout">ここはいろいろな話があるので、後でゆっくり見ると面白いです。</div>
+        </section>
+
+        <section>
+          <img src="./assets/261026/impeller-vs-skia-power.png" alt="" srcset="" />
+          <aside class="notes">
+            見るとびっくりするぐらいのIssueがありますね
+            ここは深掘り（ふかぼり）をすると、話が長くなるので、興味（きょうみ）がある方は後（あと）で見てみてください
+          </aside>
         </section>
 
         <!-- Slide 5: DevTools -->
@@ -209,16 +222,16 @@
           <aside class="notes">
             <h3>DevTools で見えること / 見えないこと</h3>
             <ul>
-              <li>energy 自体は直接見えない</li>
-              <li>でも無駄な仕事のサインはかなり見える</li>
-              <li>次の slide で native tool に進む</li>
+              <li>energy 自体（じたい）は直接（ちょくせつ）見えない</li>
+              <li>でも無駄（むだ）な仕事のサインはかなり見える</li>
+              <li>次（つぎ）の slide で native tool に進む</li>
             </ul>
           </aside>
           <div class="grid-2 mt-lg">
             <div class="card card-danger">
               <h4>
-                <i class="fa-solid fa-battery-empty icon-leading icon-danger"></i
-                >DevTools だけでは見えないもの
+                <i class="fa-solid fa-battery-empty icon-leading icon-danger"></i>DevTools
+                だけでは見えないもの
               </h4>
               <ul>
                 <li>実際の消費電力そのもの</li>
@@ -260,32 +273,26 @@
           <aside class="notes">
             <h3>ネイティブ側のツールも一緒に使う</h3>
             <ul>
-              <li>iOS と Android で道具は違う</li>
-              <li>考え方は同じで、実機で比べる</li>
-              <li>できれば Profile / Release に近い条件</li>
+              <li>iOS と Android で道具（どうぐ）は違う（ちがう）</li>
+              <li>考え方（かんがえかた）は同じで、実機（じっき）で比べる（くらべる）</li>
+              <li>できれば Profile / Release に近い条件（じょうけん）</li>
             </ul>
           </aside>
           <div class="grid-3 mt-lg">
             <div class="card card-center">
-              <i
-                class="fa-brands fa-apple icon-xl icon-primary"
-              ></i>
+              <i class="fa-brands fa-apple icon-xl icon-primary"></i>
               <h4>Xcode Instruments</h4>
               <p>Energy Log で傾向と熱状態を見る</p>
               <span class="code-label text-primary">iOS / macOS</span>
             </div>
             <div class="card card-center">
-              <i
-                class="fa-brands fa-android icon-xl icon-success"
-              ></i>
+              <i class="fa-brands fa-android icon-xl icon-success"></i>
               <h4>Android Studio</h4>
               <p>Power Profiler / Energy Profiler を使う</p>
               <span class="code-label text-success">Android</span>
             </div>
             <div class="card card-center">
-              <i
-                class="fa-solid fa-terminal icon-xl icon-info"
-              ></i>
+              <i class="fa-solid icon-xl icon-info"></i>
               <h4>Batterystats / Perfetto</h4>
               <p>長い時間の消費や wakeup を追う</p>
               <span class="code-label text-info">adb / trace</span>
@@ -301,40 +308,28 @@
             <h3>Xcode Instruments: Energy Log</h3>
             <ul>
               <li>iOS はまず Energy Log</li>
-              <li>絶対値より、同じ端末で前後比較</li>
-              <li>idle で下がるか、熱状態も見る</li>
+              <li>絶対値（ぜったいち）より、同じ端末（たんまつ）で前後比較（ぜんごひかく）</li>
+              <li>idle で下がるか、熱状態（ねつじょうたい）も見る</li>
             </ul>
           </aside>
           <div class="grid-2 mt-lg">
             <div class="card">
-              <h4>
-                <i
-                  class="fa-solid fa-microchip icon-leading icon-primary"
-                ></i
-                >算出メカニズム
-              </h4>
+              <h4><i class="fa-solid icon-leading icon-primary"></i>確認できる項目</h4>
               <ul>
                 <li>
                   <b>カーネル評価値:</b>
                   CPU/GPU/ネットワーク/カメラ等の使用量をiOSカーネルが総合評価
                 </li>
                 <li>
-                  <b>20段階エネルギーインパクト:</b> 0 (Very Low) 〜 20 (Very
-                  High) の相対指標
+                  <b>20段階エネルギーインパクト:</b> 0 (Very Low) 〜 20 (Very High) の相対指標
                 </li>
                 <li>
-                  <b>Thermal State 連携:</b> Nominal (正常) / Fair / Serious /
-                  Critical (過熱スロットリング) を監視
+                  <b>Thermal State 連携:</b> Nominal (正常) / Fair / Serious / Critical
+                  (過熱スロットリング) を監視
                 </li>
               </ul>
-            </div>
-            <div class="card">
-              <h4>
-                <i
-                  class="fa-solid fa-list-check icon-leading icon-success"
-                ></i
-                >計測のやり方とチェックポイント
-              </h4>
+
+              <h4><i class="fa-solid icon-leading icon-success"></i>使い方</h4>
               <ul>
                 <li>
                   実機を Wi-Fi デバッグ接続し Xcode Instruments の
@@ -350,6 +345,9 @@
                 </li>
               </ul>
             </div>
+            <div class="card">
+              <img src="./assets/261026/Screenshot 2026-10-14 at 15.57.39.png" alt="" />
+            </div>
           </div>
         </section>
 
@@ -360,95 +358,63 @@
           <aside class="notes">
             <h3>Android Studio: Power Profiler</h3>
             <ul>
-              <li>Android はまず全体感を見るのに便利</li>
-              <li>Light に戻るかを見る</li>
-              <li>WakeLock や background の気配も見る</li>
+              <li>Android はまず全体感（ぜんたいかん）を見るのに便利（べんり）</li>
+              <li>Light に戻る（もどる）かを見る</li>
+              <li>WakeLock や background の気配（けはい）も見る</li>
             </ul>
           </aside>
           <div class="grid-2 mt-lg">
             <div class="card">
-              <h4>
-                <i
-                  class="fa-solid fa-chart-line icon-leading icon-success"
-                ></i
-                >見られるもの
-              </h4>
+              <h4><i class="fa-solid icon-leading icon-success"></i>確認できる項目</h4>
               <ul>
-                <li>
-                  <b>サブシステム監視:</b> CPU・Network・Location (GPS)
-                  の動きをまとめて見る
-                </li>
-                <li>
-                  <b>エネルギー帯:</b> Light / Medium / Heavy
-                  のようなざっくりした負荷感
-                </li>
-                <li>
-                  <b>イベント観察:</b> WakeLock やバックグラウンド動作の気配
-                </li>
+                <li><b>サブシステム監視:</b> CPU・Network・Location (GPS) の動きをまとめて見る</li>
+                <!-- <li><b>エネルギー帯:</b> Light / Medium / Heavy のようなざっくりした負荷感</li>
+                <li><b>イベント観察:</b> WakeLock やバックグラウンド動作の気配</li> -->
               </ul>
-            </div>
-            <div class="card">
-              <h4>
-                <i
-                  class="fa-solid fa-vial icon-leading icon-primary"
-                ></i
-                >使い方のポイント
-              </h4>
+
+              <h4><i class="fa-solid icon-leading icon-primary"></i>使い方</h4>
               <ul>
                 <li>
                   <code>&lt;profileable android:shell="true"/&gt;</code>
                   を含むビルドを準備
                 </li>
-                <li>
-                  Android Studio Profiler で、操作中と無操作中の差を見る
-                </li>
-                <li>
-                  無操作時に <b>Light</b> に戻るかを見る
-                </li>
+                <li>Android Studio Profiler で、操作中と無操作中の差を見る</li>
+                <!-- <li>無操作時に <b>Light</b> に戻るかを見る</li> -->
               </ul>
+            </div>
+
+            <div class="card">
+              <img src="./assets/261026/Screenshot 2026-10-14 at 16.03.52.png" alt="" />
             </div>
           </div>
         </section>
 
-        <!-- Slide 7c: Batterystats & Battery Historian -->
+        <!-- Slide 7c: Batterystats & Battery Battery Historian -->
         <section>
           <span class="badge badge-primary">深度解析</span>
-          <h2>Batterystats / Historian / Perfetto</h2>
+          <h2>Batterystats / Battery Historian / Perfetto</h2>
           <aside class="notes">
-            <h3>Batterystats / Historian / Perfetto</h3>
+            <h3>Batterystats / Battery Historian / Perfetto</h3>
             <ul>
-              <li>もっと深く見る時の道具</li>
-              <li>長い時間の消費や sleep を邪魔していないか確認</li>
-              <li>ODPM もあるけど、まだ使える端末は多くない</li>
+              <li>もっと深く（ふかく）見る時の道具</li>
+              <li>
+                長い時間（ながいじかん）の消費（しょうひ）や sleep
+                を邪魔（じゃま）していないか確認（かくにん）
+              </li>
+              <li>ODPM もあるけど、まだ使える端末（たんまつ）は多くない</li>
             </ul>
           </aside>
           <div class="grid-2 mt-lg">
             <div class="card">
-              <h4>
-                <i
-                  class="fa-solid fa-database icon-leading icon-info"
-                ></i
-                >何がわかるか
-              </h4>
+              <h4><i class="fa-solid icon-leading icon-info"></i>確認できる項目</h4>
               <ul>
-                <li>
-                  <b>Batterystats:</b> Android OS が記録する低レイヤーの消費ログ
-                </li>
-                <li>
-                  <b>Historian:</b> ログをブラウザで見やすく確認
-                </li>
-                <li>
-                  <b>Perfetto:</b> もっと細かい trace を見たい時に便利
-                </li>
+                <li><b>Batterystats:</b> Android OS が記録する低レイヤーの消費ログ</li>
+                <li><b>Battery Historian:</b> ログをブラウザで見やすく確認</li>
+                <li><b>Perfetto:</b> もっと細かい trace を見たい時に便利</li>
               </ul>
             </div>
             <div class="card">
-              <h4>
-                <i
-                  class="fa-solid fa-terminal icon-leading icon-primary"
-                ></i
-                >最小の流れ
-              </h4>
+              <h4><i class="fa-solid icon-leading icon-primary"></i>使い方</h4>
               <pre><code class="language-bash"># 統計のリセット
 adb shell dumpsys batterystats --reset
 # USBを外して実機で操作・放置
@@ -462,81 +428,230 @@ adb bugreport bugreport.zip</code></pre>
         </section>
 
         <!-- Slide 7d: Demo Plan -->
-        <section>
+        <!-- <section>
           <span class="badge badge-primary">demo</span>
           <h2>LT では小さい stress test app で全体だけ見せる</h2>
           <p class="lead">
-            ここは後で実機デモや録画に差し替える予定です。LT では widget 個別 deep dive までは行かず、
-            まずは energy の見方と、どこが危ないかをざっくり shared します。
+            ここは後で実機デモや録画に差し替える予定です。LT では widget 個別 deep dive
+            までは行かず、 まずは energy の見方と、どこが危ないかをざっくり shared します。
           </p>
           <div class="placeholder-frame">
             <strong>demo / recording placeholder</strong>
             <span>実機で stress test app の before / after を見せる予定</span>
           </div>
           <div class="callout">
-            この後の細かい widget ごとの deep dive は、別の資料に分けます。
-            この LT では、まず全体の見方と持ち帰りだけに絞ります。
+            この後の細かい widget ごとの deep dive は、別の資料に分けます。 この LT
+            では、まず全体の見方と持ち帰りだけに絞ります。
           </div>
           <div class="grid-3 mt-lg">
             <div class="card">
               <h4>メインIsolate（CPU）の短時間占有</h4>
               <p>
-                重い計算が UI と同じ main isolate で走ると、CPU が一気に上がって熱も battery もきつくなります。
+                重い計算が UI と同じ main isolate で走ると、CPU が一気に上がって熱も battery
+                もきつくなります。
               </p>
               <p>
                 <b>対策:</b> <code>Isolate.run()</code> や <code>compute()</code>
                 に逃がす。
               </p>
-              <p>
-                <b>例:</b> 大きい JSON の <code>jsonDecode</code> や、履歴DBの暗号化。
-              </p>
+              <p><b>例:</b> 大きい JSON の <code>jsonDecode</code> や、履歴DBの暗号化。</p>
             </div>
             <div class="card">
               <h4>画面外アニメーションの無駄な再描画</h4>
               <p>
-                <code>Opacity: 0</code> でも Ticker は止まらないので、見えていなくても GPU 仕事が続くことがあります。
+                <code>Opacity: 0</code> でも Ticker は止まらないので、見えていなくても GPU
+                仕事が続くことがあります。
               </p>
               <p>
-                <b>対策:</b> 非表示時は <code>stop()</code>、または lifecycle に合わせて pause / dispose。
+                <b>対策:</b> 非表示時は <code>stop()</code>、または lifecycle に合わせて pause /
+                dispose。
               </p>
-              <p>
-                <b>例:</b> 別タブに行った後も、裏側で loading や slideshow が回り続ける時。
-              </p>
+              <p><b>例:</b> 別タブに行った後も、裏側で loading や slideshow が回り続ける時。</p>
             </div>
             <div class="card">
               <h4>細かすぎる通信と Radio Tail Time</h4>
               <p>
                 数バイトでも通信チップは高電力モードに起きて、しばらくそのまま残ります。小分け通信は地味に高いです。
               </p>
-              <p>
-                <b>対策:</b> polling を減らす。Push、WebSocket、batch 送信を使う。
-              </p>
+              <p><b>対策:</b> polling を減らす。Push、WebSocket、batch 送信を使う。</p>
               <p>
                 <b>例:</b> <code>Timer.periodic</code> で 1〜2秒ごとに新着チェックを投げ続ける時。
               </p>
             </div>
           </div>
+        </section> -->
+
+        <section>
+          <span class="badge badge-danger">消費電力</span>
+          <h2>バッテリー消費の主な原因</h2>
+          <aside class="notes">
+            <h3>バッテリー消費の主な原因</h3>
+            <ul>
+              <li>
+                バックグラウンドでデータを連続（れんぞく） polling
+                すると、通信（つうしん）が続いて電力を使う
+              </li>
+              <li>
+                アニメーションや毎フレームの shader 計算で CPU / GPU
+                が長時間（ちょうじかん）動き続ける
+              </li>
+            </ul>
+          </aside>
+          <div class="grid-2 mt-lg">
+            <div class="card card-danger">
+              <h3>バックグラウンド通信</h3>
+              <p>データ取得の連続 polling など、画面を見ていない間も通信が続く。</p>
+            </div>
+            <div class="card card-danger">
+              <h3>CPU / GPU の連続稼働</h3>
+              <p>アニメーションの描画や毎フレームの shader 計算が長時間続く。</p>
+            </div>
+          </div>
         </section>
 
-        <!-- Slide 11: 4 Architectural Principles -->
         <section>
-          <span class="badge badge-primary">実装・設計指針</span>
-          <h2>今日の持ち帰り: 4つの設計原則</h2>
+          <h1 class="heading-hero">Liquid Glassの話しますか</h1>
           <aside class="notes">
-            <h3>今日の持ち帰り: 4つの設計原則</h3>
+            <h3>Flutter の Liquid Glass を少し見てみましょう</h3>
             <ul>
-              <li>ここからは LT のまとめパート</li>
-              <li>見えない時は止める</li>
-              <li>repaint の範囲を小さくする</li>
-              <li>重い effect は状況で弱める</li>
+              <li>ここで Flutter アプリの Liquid Glass 表現（ひょうげん）を短く見ます</li>
+              <li>
+                続けて iOS 標準（ひょうじゅん）の Liquid Glass
+                も見て、表現（ひょうげん）の違い（ちがい）を比べます
+              </li>
+              <li>
+                この後（あと）、Flutter 側で使われる BackdropFilter
+                の描画（びょうが）コストに戻ります
+              </li>
+            </ul>
+          </aside>
+        </section>
+
+        <section>
+          <h4>liquid_glass_widgetsを使用しているページ</h4>
+          <video
+            autoplay
+            muted
+            loop
+            controls
+            src="./assets/261026/Screen Recording 2026-10-14 at 15.52.30.mp4"
+          ></video>
+        </section>
+
+        <section>
+          <h4>Native iOS Liquid Glass</h4>
+          <video
+            autoplay
+            muted
+            loop
+            controls
+            src="./assets/261026/Screen Recording 2026-10-14 at 15.49.07.mp4"
+          ></video>
+        </section>
+
+        <section>
+          <span class="badge badge-danger">描画コスト</span>
+          <h2>Liquid Glass の裏側: BackdropFilter</h2>
+          <aside class="notes">
+            <h3>Liquid Glass の裏側: BackdropFilter</h3>
+            <ul>
+              <li>
+                BackdropFilter
+                は自分の子ではなく、背後（はいご）に描かれた内容（ないよう）をフィルターする
+              </li>
+              <li>
+                ぼかした背景（はいけい）に半透明（はんとうめい）の色や枠（わく）を重ねて、ガラスらしい見た目を作る
+              </li>
+              <li>
+                背景（はいけい）が動くと、変化（へんか）したフレームごとにフィルター処理（しょり）も必要（ひつよう）になる
+              </li>
+              <li>
+                広い領域（りょういき）や強い blur は GPU
+                の仕事とメモリ帯域を増やし、電池（でんち）と発熱（はつねつ）に影響（えいきょう）する
+              </li>
+              <li>
+                クリップで範囲（はんい）を絞り、スクロール中は弱める。実機（じっき）の profiler
+                で差（さ）を確かめる
+              </li>
             </ul>
           </aside>
           <div class="grid-2 mt-lg">
             <div class="card">
-              <h4>1. ライフサイクル連動</h4>
-              <p>
-                画面非表示時・バックグラウンド移行時は即座にアニメーションとTimerを完全停止。
+              <h4>
+                <i class="fa-solid fa-layer-group icon-leading icon-primary"></i>何を描いている?
+              </h4>
+              <ol>
+                <li>背後の画面を読み取る</li>
+                <li>指定範囲に blur などの画像フィルターをかける</li>
+                <li>半透明の tint や枠を重ねて合成する</li>
+              </ol>
+              <p class="support-text">
+                <code>BackdropFilter</code>
+                は背後のピクセルを加工します。クリップすると処理範囲を限定できます。
               </p>
+            </div>
+            <div class="card card-danger">
+              <h4>
+                <i class="fa-solid fa-battery-half icon-leading icon-danger"></i>なぜ電池に響く?
+              </h4>
+              <ul>
+                <li>スクロールやアニメーションで背景が変わるたび、フィルター結果も更新</li>
+                <li>広い範囲・強い blur・重なるフィルターほど GPU とメモリ帯域の負荷が増える</li>
+                <li>GPU が働き続けると消費電力と発熱が増え、長時間では性能低下にもつながる</li>
+              </ul>
+            </div>
+          </div>
+          <div class="callout">
+            <b>設計のコツ:</b> まずクリップで範囲を絞る。必要なら blur
+            を弱めるか、半透明の単色レイヤーに置き換え、実機で比較する。
+          </div>
+        </section>
+
+        <section>
+          <span class="badge badge-primary">描画フロー</span>
+          <h2>BackdropFilter はどう描画される?</h2>
+          <pre class="mermaid">
+flowchart TD
+  background["背後のWidgetを描画"] --> capture["対象範囲を取り込む"]
+  capture --> blur["blur を適用"]
+  blur --> composite["tint・前景と合成"]
+  composite --> output["画面に出力"]
+          </pre>
+
+          <img src="./assets/261026/Screenshot 2026-10-14 at 17.55.35.png" alt="" />
+          <p class="lead">背景が動くと、新しいフレームごとにフィルター結果も作り直します。</p>
+        </section>
+
+        <section>
+          <h2>でも、BackdropFilterを使いたい！</h2>
+
+          <h4>以下のように動くとどうですか</h4>
+
+          <ul>
+            <li>他のWidgetを使えるかどうかをみましょう</li>
+            <img src="./assets/261026/Screenshot 2026-10-14 at 18.03.05.png" alt="" />
+            <li>コストが高いWidgetを使っている場所は見た目的にどうなっているのか</li>
+            <li>実際にこの表示で良いのか</li>
+          </ul>
+        </section>
+
+        <!-- Slide 11: 3 Architectural Principles -->
+        <section>
+          <span class="badge badge-primary">実装・設計指針</span>
+          <h2>まとめ</h2>
+          <aside class="notes">
+            <h3>今日の持ち帰り: 3つの設計原則</h3>
+            <ul>
+              <li>ここからは LT のまとめパート</li>
+              <li>見えない時は止める</li>
+              <li>repaint の範囲（はんい）を小さくする</li>
+              <li>重い effect は状況（じょうきょう）で弱める</li>
+            </ul>
+          </aside>
+          <div class="grid-3 mt-lg">
+            <div class="card">
+              <h4>1. ライフサイクル連動</h4>
+              <p>画面非表示時・バックグラウンド移行時は即座にアニメーションとTimerを完全停止。</p>
             </div>
             <div class="card">
               <h4>2. 描画境界の適切な隔離</h4>
@@ -545,14 +660,9 @@ adb bugreport bugreport.zip</code></pre>
                 <code>RepaintBoundary</code> を付与し、静的UIの再描画を防止。
               </p>
             </div>
+
             <div class="card">
-              <h4>3. 状況に応じたエフェクト調整</h4>
-              <p>
-                低電力モード時やスクロール中は、重い装飾・ぼかしを自動でフラット表示に切替。
-              </p>
-            </div>
-            <div class="card">
-              <h4>4. AIアシスタントへの指針共有</h4>
+              <h4>3. AIアシスタントへの指針共有</h4>
               <p>
                 LLMにコード生成させる際、安易に Opacity や BackdropFilter
                 を書かせないプロンプト規約を策定。
@@ -564,21 +674,19 @@ adb bugreport bugreport.zip</code></pre>
         <!-- Slide 12: Release Checklist -->
         <section>
           <span class="badge badge-primary">実務チェック</span>
-          <h2>リリース前省電力チェックリスト</h2>
+          <h2>今後確認できると良いもの</h2>
           <aside class="notes">
             <h3>リリース前省電力チェックリスト</h3>
             <ul>
-              <li>release 前に実機で確認</li>
-              <li>操作中だけでなく無操作中も見る</li>
-              <li>重い widget が残っていないか確認する</li>
+              <li>release 前に実機（じっき）で確認（かくにん）</li>
+              <li>操作中（そうさちゅう）だけでなく無操作中（むそうさちゅう）も見る</li>
+              <li>重い widget が残っていないか確認（かくにん）する</li>
             </ul>
           </aside>
           <div class="grid-2 mt-lg">
             <div class="card">
               <h4>
-                <i
-                  class="fa-solid fa-laptop-code icon-leading icon-primary"
-                ></i
+                <i class="fa-solid fa-laptop-code icon-leading icon-primary"></i
                 >計測・プロファイリング環境
               </h4>
               <ul>
@@ -590,57 +698,45 @@ adb bugreport bugreport.zip</code></pre>
             </div>
             <div class="card">
               <h4>
-                <i
-                  class="fa-solid fa-code icon-leading icon-success"
-                ></i
-                >コードレビューとウィジェット
+                <i class="fa-solid fa-code icon-leading icon-success"></i
+                >コードレビュー指摘と重いウィジェット
               </h4>
               <ul>
-                <li>
-                  透過に <code>Opacity</code> でなく色アルファ値を使ったか？
-                </li>
-                <li>
-                  <code>BackdropFilter</code> を擬似レイヤー等で代替したか？
-                </li>
-                <li>
-                  <code>antiAliasWithSaveLayer</code> を乱用していないか？
-                </li>
+                <li>透過に <code>Opacity</code> でなく色アルファ値を使ったか？</li>
+                <li><code>BackdropFilter</code> を擬似レイヤー等で代替したか？</li>
+                <li><code>antiAliasWithSaveLayer</code> を乱用していないか？</li>
                 <li>画面外の Ticker / Timer が確実に停止しているか？</li>
               </ul>
             </div>
           </div>
+          <h4>パーフォマンスとしてバッテリー消費を一つの項目にしていきましょう</h4>
         </section>
 
         <!-- Slide 13: Conclusion -->
         <section>
           <span class="badge badge-primary">SUMMARY &amp; CONCLUSION</span>
-          <h2 class="heading-large">
-            「滑らかさ」の先へ、<br />端末に優しいFlutterアプリを
-          </h2>
+          <h2 class="heading-large">ご静聴ありがとうございました！</h2>
           <aside class="notes">
             <h3>まとめ</h3>
             <ul>
-              <li>smooth だけでなく、止まれる UI を作る</li>
-              <li>ユーザーの battery と熱に優しいアプリへ</li>
-              <li>質問どうぞ、で終わる</li>
+              <li>smooth だけでなく、止まれる（とまれる） UI を作る</li>
+              <li>ユーザーの battery と熱（ねつ）に優しいアプリへ</li>
+              <li>質問（しつもん）どうぞ、で終わる</li>
             </ul>
           </aside>
-          <p class="summary-copy">
-            まずは energy を直接見ようとしすぎず、
-            無駄な仕事が残っていないかを見るところから始めます。<br />
-            その上で、実機計測と小さい改善を積み重ねていきます。
-          </p>
+          <!-- <p class="summary-copy">
+            まずは energy を直接（ちょくせつ）見ようとしすぎず、
+            無駄（むだ）な仕事が残っていないかを見るところから始めます。<br />
+            その上で、実機計測（じっきけいそく）と小さい改善（かいぜん）を積み重ね（つみかさね）ていきます。
+          </p> -->
           <div class="chip-row">
             <span class="chip-accent">
-              <i class="fa-solid fa-comments inline-icon"></i
-              >質疑応答 (Q&amp;A)
+              <i class="fa-solid fa-comments inline-icon"></i>質疑応答 (Q&amp;A)
             </span>
-            <span class="chip-meta">
-              #Flutter #EnergyOptimization
-            </span>
+            <span class="chip-meta"> #Flutter #EnergyOptimization </span>
           </div>
         </section>
-          </div>
+      </div>
     </div>
 
     <!-- Reveal.js and Prism.js -->
@@ -649,20 +745,29 @@ adb bugreport bugreport.zip</code></pre>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-dart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
     <script>
       const slideSources = [
         [
           ["Flutter performance", "https://docs.flutter.dev/perf"],
-          ["Flutter perf:energy label", "https://github.com/flutter/flutter/labels/perf%3A%20energy"],
+          [
+            "Flutter perf:energy label",
+            "https://github.com/flutter/flutter/labels/perf%3A%20energy",
+          ],
         ],
+        [["Flutter performance", "https://docs.flutter.dev/perf"]],
         [
-          ["Flutter performance", "https://docs.flutter.dev/perf"],
+          [
+            "Flutter perf:energy label",
+            "https://github.com/flutter/flutter/labels/perf%3A%20energy",
+          ],
         ],
+        [["Flutter performance", "https://docs.flutter.dev/perf"]],
         [
-          ["Flutter performance", "https://docs.flutter.dev/perf"],
-        ],
-        [
-          ["Flutter perf:energy label", "https://github.com/flutter/flutter/labels/perf%3A%20energy"],
+          [
+            "Flutter perf:energy label",
+            "https://github.com/flutter/flutter/labels/perf%3A%20energy",
+          ],
         ],
         [
           ["DevTools performance view", "https://docs.flutter.dev/tools/devtools/performance"],
@@ -670,64 +775,101 @@ adb bugreport bugreport.zip</code></pre>
         ],
         [
           ["Xcode Instruments", "https://developer.apple.com/documentation/xcode/instruments"],
-          ["Android Studio Power Profiler", "https://developer.android.com/studio/profile/power-profiler"],
+          [
+            "Android Studio Power Profiler",
+            "https://developer.android.com/studio/profile/power-profiler",
+          ],
           ["Perfetto", "https://perfetto.dev/"],
-          ["Battery Historian", "https://github.com/google/battery-historian"],
+          ["Battery Battery Historian", "https://github.com/google/battery-Battery Historian"],
         ],
         [
           ["Xcode Instruments", "https://developer.apple.com/documentation/xcode/instruments"],
-          ["Apple Energy Efficiency Guide", "https://developer.apple.com/library/archive/documentation/Performance/Conceptual/EnergyGuide-iOS/"],
+          [
+            "Apple Energy Efficiency Guide",
+            "https://developer.apple.com/library/archive/documentation/Performance/Conceptual/EnergyGuide-iOS/",
+          ],
         ],
         [
-          ["Android Studio Power Profiler", "https://developer.android.com/studio/profile/power-profiler"],
+          [
+            "Android Studio Power Profiler",
+            "https://developer.android.com/studio/profile/power-profiler",
+          ],
         ],
         [
           ["Android batterystats", "https://developer.android.com/tools/dumpsys#battery"],
-          ["Battery Historian", "https://github.com/google/battery-historian"],
+          ["Battery Battery Historian", "https://github.com/google/battery-Battery Historian"],
           ["Perfetto", "https://perfetto.dev/"],
         ],
+        [],
+        [],
+        [],
         [
-          ["Flutter performance best practices", "https://docs.flutter.dev/perf/best-practices"],
-          ["Flutter isolate performance", "https://docs.flutter.dev/perf/isolates"],
-          ["Android Studio Power Profiler", "https://developer.android.com/studio/profile/power-profiler"],
-        ],
-        [
-          ["RepaintBoundary API", "https://api.flutter.dev/flutter/widgets/RepaintBoundary-class.html"],
-          ["Flutter performance best practices", "https://docs.flutter.dev/perf/best-practices"],
-        ],
-        [
+          [
+            "BackdropFilter API",
+            "https://api.flutter.dev/flutter/widgets/BackdropFilter-class.html",
+          ],
           ["Flutter performance best practices", "https://docs.flutter.dev/perf/best-practices"],
         ],
         [
-          ["Flutter performance", "https://docs.flutter.dev/perf"],
+          [
+            "RepaintBoundary API",
+            "https://api.flutter.dev/flutter/widgets/RepaintBoundary-class.html",
+          ],
+          ["Flutter performance best practices", "https://docs.flutter.dev/perf/best-practices"],
         ],
-      ];
+        [
+          ["Flutter performance best practices", "https://docs.flutter.dev/perf/best-practices"],
+          [
+            "BackdropFilter API",
+            "https://api.flutter.dev/flutter/widgets/BackdropFilter-class.html",
+          ],
+        ],
+        [],
+        [],
+      ]
 
+      /*
       const renderSources = (sources) =>
         sources
           .map(
             ([label, url]) =>
               `<a href="${url}" target="_blank" rel="noopener noreferrer">${label}</a>`,
           )
-          .join(" · ");
+          .join(" · ")
 
       document.querySelectorAll(".slides > section").forEach((section, index) => {
-        const sources = slideSources[index] || [];
-        if (!sources.length) return;
+        const sources = slideSources[index] || []
+        if (!sources.length) return
 
-        const notes = section.querySelector(":scope > aside.notes");
-        const sourceNode = document.createElement("div");
-        sourceNode.className = "slide-sources";
-        sourceNode.innerHTML = `参考: ${renderSources(sources)}`;
+        const notes = section.querySelector(":scope > aside.notes")
+        const sourceNode = document.createElement("div")
+        sourceNode.className = "slide-sources"
+        sourceNode.innerHTML = `参考: ${renderSources(sources)}`
 
         if (notes) {
-          section.insertBefore(sourceNode, notes);
+          section.insertBefore(sourceNode, notes)
         } else {
-          section.appendChild(sourceNode);
+          section.appendChild(sourceNode)
         }
-      });
+      })
 
-      Prism.highlightAll();
+      */
+
+      Prism.highlightAll()
+
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: "base",
+        themeVariables: {
+          background: "#ebfff0",
+          primaryColor: "#c5ffdb",
+          primaryTextColor: "#174029",
+          primaryBorderColor: "#ff1493",
+          lineColor: "#2d9d5c",
+          edgeLabelBackground: "#ebfff0",
+          fontFamily: '"Plus Jakarta Sans", sans-serif',
+        },
+      })
 
       Reveal.initialize({
         width: 1280,
@@ -742,7 +884,9 @@ adb bugreport bugreport.zip</code></pre>
         transition: "fade",
         transitionSpeed: "fast",
         plugins: [RevealNotes],
-      });
+      })
+
+      mermaid.run()
     </script>
   </body>
 </html>
