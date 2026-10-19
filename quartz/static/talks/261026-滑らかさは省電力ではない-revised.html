@@ -1,0 +1,946 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>画面の滑らかさの裏側：DevToolsから考えるFlutterアプリのバッテリー消費と最適化</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/dist/reset.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/dist/reveal.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/dist/theme/white.css"
+    />
+    <link rel="stylesheet" href="./normalize.css" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section>
+          <h1>画面の滑らかさの裏側：DevToolsから考えるFlutterアプリのバッテリー消費と最適化</h1>
+          <h3>Behind Smooth Scrolling: Evaluating Flutter App Battery Consumption via DevTools</h3>
+          <p>anushka・opheliagame・アン</p>
+          <aside class="notes">
+            <p>今日は、画面の滑らかさと電池の使い方について話します。</p>
+            <p>きっかけは、FlutterのLiquid Glassを使った画面を実機で測ったことです。</p>
+            <p>最初に測定結果を見て、そのあとで、なぜそうなったのかを一緒に考えます。</p>
+            <p class="furigana">
+              ふりがな:
+              今日=きょう、画面=がめん、滑=なめ、電池=でんち、使=つか、方=かた、話=はな、実機=じっき、測=はか、最初=さいしょ、測定結果=そくていけっか、見=み、一緒=いっしょ、考=かんが
+            </p>
+          </aside>
+        </section>
+        <section>
+          <h2>自己紹介</h2>
+          <ul>
+            <li>インド出身</li>
+            <li>flutter engineer 5年目</li>
+            <li>teamlab チームラボ 2年目</li>
+            <li>creative coding #p5.js</li>
+            <li>live coding #hydra #glsl</li>
+            <li>モノづくり 木工初心者</li>
+          </ul>
+          <aside class="notes">
+            <p>インド出身で、Flutter Engineerとして5年目になります。</p>
+            <p>仕事ではFlutterを書いています。creative codingも好きです。</p>
+            <p>p5.jsを使ったり、live codingで映像を作ったりします。</p>
+            <p>今日は、見た目を作る技術と、その裏で動く端末の仕事をつなげて話します。</p>
+            <p class="furigana">
+              ふりがな:
+              出身=しゅっしん、年目=ねんめ、仕事=しごと、書=か、好=す、使=つか、映像=えいぞう、作=つく、今日=きょう、見=み、目=め、技術=ぎじゅつ、裏=うら、動=うご、端末=たんまつ、話=はな
+            </p>
+          </aside>
+        </section>
+
+        <section>
+          <h1>画面の滑らかさの裏側：DevToolsから考えるFlutterアプリのバッテリー消費と最適化</h1>
+
+          <!-- <ul>
+            <li>滑らかな画面なら、電池にもやさしいでしょうか</li>
+            <li>画面が動いていない時、アプリは止まれているでしょうか</li>
+            <li>見た目の効果に、どれくらいの仕事が必要でしょうか</li>
+          </ul> -->
+          <aside class="notes">
+            <p>さっそくですが、今日のテーマに入りたいと思います</p>
+            <p>この話に答えるには一つの例が必要なので、</p>
+            <!-- <p>タイトルが長いので、ちょっと切り出してみました</p> -->
+
+            <!-- <p>画面が滑らかに動くことは、とても大切です。</p>
+            <p>
+              ただし、滑らかさだけでは、電池の使い方は分かりません。
+            </p>
+            <p>
+              画面を見ていない時に処理が続いていないかも大切です。
+            </p>
+            <p>
+              今日は、Liquid Glassの測定結果を使って、この問いを具体的に考えます。
+            </p> -->
+            <p class="furigana">
+              ふりがな:
+              今日=きょう、テーマ=てーま、入る=はいる、話=はなし、答える=こたえる、一つ=ひとつ、例=れい、必要=ひつよう
+            </p>
+          </aside>
+        </section>
+
+        <section>
+          <!-- convert into text scattered in background -->
+          <p>Flutter・Liquid Glass・エネルギー</p>
+          <img src="./assets/261026/hero_row2.webp" alt="" />
+
+          <aside class="notes">
+            <p>LGを一つの例としてみていきましょう</p>
+            <p>知らない方いないと思いますが、、</p>
+            <p>Liquid Glassは、ガラスのように背景が透けて見えるUI表現です。</p>
+            <p>Flutterでは、背景をぼかし、半透明の色を重ねて、この見た目を作れます。</p>
+            <p>背景が動くと、ぼかしの結果も更新する必要があります。</p>
+            <p>
+              ここからは、この表現を作る処理が、端末のエネルギーにどう関係するかを見ていきます。
+            </p>
+            <p class="furigana">
+              ふりがな:
+              背景=はいけい、透=す、見=み、表現=ひょうげん、半透明=はんとうめい、色=いろ、重=かさ、目=め、作=つく、動=うご、結果=けっか、更新=こうしん、必要=ひつよう、処理=しょり、端末=たんまつ、関係=かんけい
+            </p>
+          </aside>
+        </section>
+
+        <section>
+          <p>Flutter・Liquid Glass・エネルギー</p>
+          <h1>エネルギーパーフォマンスはどうでしょう</h1>
+
+          <aside class="notes">
+            <p>エネルギーの話なので、テストの結果を持ってきました。</p>
+            <p class="furigana">ふりがな: 話=はなし、結果=けっか、持つ=もつ</p>
+          </aside>
+        </section>
+
+        <section>
+          <h2>測定結果</h2>
+          <ul>
+            <li>同じHome画面の20秒を比較</li>
+            <li>Liquid Glass: 33.19 J</li>
+            <li>通常表示: 25.79 J</li>
+            <li>測定した電力レールのエネルギーは28.7%増加</li>
+          </ul>
+          <aside class="notes">
+            <p>
+              結論からお伝えします。同じHome画面を20秒ずつ測定したところ、Liquid
+              Glass側は33.19ジュール、通常表示は25.79ジュールでした。
+            </p>
+            <p>
+              測定した電力レールの合計では、Liquid
+              Glass側が7.41ジュール、28.7パーセント高い結果です。
+            </p>
+            <p>
+              ただし、この記録は端末を充電しながら取っています。アプリ単体の消費電力や、電池寿命が28.7パーセント短くなることを示す数字ではありません。
+            </p>
+            <p>
+              さらに、差の約95パーセントは最後の5秒に集中していました。では、その時、アプリでは何が起きていたのでしょうか。
+            </p>
+            <p>
+              ふりがな:
+              結論=けつろん、伝える=つたえる、同じ=おなじ、画面=がめん、測定=そくてい、通常表示=つうじょうひょうじ、合計=ごうけい、高い=たかい、結果=けっか、端末=たんまつ、充電=じゅうでん、記録=きろく、取る=とる、単体=たんたい、消費電力=しょうひでんりょく、電池寿命=でんちじゅみょう、短い=みじかい、示す=しめす、数字=すうじ、差=さ、最後=さいご、秒=びょう、集中=しゅうちゅう、時=とき、何=なに、起きる=おきる
+            </p>
+          </aside>
+        </section>
+
+        <section>
+          <h2>エネルギー消費</h2>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="100%"
+            height="auto"
+            viewBox="0 0 1200 500"
+            role="img"
+            aria-labelledby="power-chart-title power-chart-description"
+            preserveAspectRatio="xMidYMid meet"
+          >
+            <title id="power-chart-title">5秒ごとの測定電力レール平均値</title>
+            <desc id="power-chart-description">
+              通常表示とLiquid
+              Glassの平均電力を、アプリ起動後3秒から23秒まで5秒ごとに比較。最後の5秒でLiquid
+              Glassが2.767ワット、通常表示が1.357ワット。差の約95パーセントがこの区間に発生。
+            </desc>
+            <g font-family="sans-serif" fill="#174029">
+              <circle cx="745" cy="38" r="10" fill="#2d9d5c" />
+              <text x="765" y="47" font-size="26">通常表示</text>
+              <circle cx="935" cy="38" r="10" fill="#ff1493" />
+              <text x="955" y="47" font-size="26">Liquid Glass</text>
+
+              <text x="60" y="88" font-size="23" fill="#2d9d5c">起動から</text>
+              <text x="350" y="88" font-size="23" fill="#2d9d5c">平均電力（W）</text>
+              <g font-size="22" fill="#2d9d5c" text-anchor="middle">
+                <text x="350" y="118">0</text>
+                <text x="550" y="118">1</text>
+                <text x="750" y="118">2</text>
+                <text x="950" y="118">3</text>
+              </g>
+
+              <rect x="40" y="347" width="1120" height="78" rx="8" fill="#fff0f7" />
+              <g stroke="#174029" stroke-opacity="0.2" stroke-width="2">
+                <line x1="350" y1="128" x2="350" y2="425" />
+                <line x1="550" y1="128" x2="550" y2="425" />
+                <line x1="750" y1="128" x2="750" y2="425" />
+                <line x1="950" y1="128" x2="950" y2="425" />
+              </g>
+
+              <g font-size="26">
+                <text x="60" y="170">+3–8秒</text>
+                <text x="60" y="247">+8–13秒</text>
+                <text x="60" y="324">+13–18秒</text>
+                <text x="60" y="401" font-weight="700">+18–23秒</text>
+              </g>
+              <g font-size="21" fill="#2d9d5c">
+                <text x="245" y="157">通常</text>
+                <text x="245" y="179">Glass</text>
+                <text x="245" y="234">通常</text>
+                <text x="245" y="256">Glass</text>
+                <text x="245" y="311">通常</text>
+                <text x="245" y="333">Glass</text>
+                <text x="245" y="388">通常</text>
+                <text x="245" y="410">Glass</text>
+              </g>
+
+              <g fill="#2d9d5c">
+                <rect x="350" y="143" width="339.6" height="16" rx="3" />
+                <rect x="350" y="220" width="188" height="16" rx="3" />
+                <rect x="350" y="297" width="232.4" height="16" rx="3" />
+                <rect x="350" y="374" width="271.4" height="16" rx="3" />
+              </g>
+              <g fill="#ff1493">
+                <rect x="350" y="165" width="431.2" height="16" rx="3" />
+                <rect x="350" y="242" width="175.2" height="16" rx="3" />
+                <rect x="350" y="319" width="167.8" height="16" rx="3" />
+                <rect x="350" y="396" width="553.4" height="16" rx="3" />
+              </g>
+
+              <g font-size="22" font-weight="700">
+                <text x="704" y="158">1.698 W</text>
+                <text x="796" y="180">2.156 W</text>
+                <text x="552" y="235">0.940 W</text>
+                <text x="539" y="257">0.876 W</text>
+                <text x="596" y="312">1.162 W</text>
+                <text x="532" y="334">0.839 W</text>
+                <text x="635" y="389">1.357 W</text>
+                <text x="917" y="411">2.767 W</text>
+              </g>
+
+              <text x="60" y="464" font-size="24" font-weight="700" fill="#ff1493">
+                最後の5秒: +7.05 J（20秒間の純増分の約95%）
+              </text>
+              <text x="60" y="492" font-size="18" fill="#2d9d5c">
+                測定した24本の電力レールの平均値。両方の記録で端末は充電中。
+              </text>
+            </g>
+          </svg>
+          <aside class="notes">
+            <p>20秒の平均だけでは見えにくいので、5秒ずつに分けました。</p>
+            <p>途中の10秒では、Liquid Glass側の測定値が低くなっています。</p>
+            <p>
+              一方、最後の5秒では平均電力が2.767ワット対1.357ワットで、その5秒だけで約7.05ジュールの差が出ました。
+            </p>
+            <p>
+              これは測定した電力レールの差です。充電中の記録なので、アプリ単体の消費電力や電池寿命を示す数字ではありません。
+            </p>
+            <p class="furigana">
+              ふりがな:
+              秒=びょう、分=わ、途中=とちゅう、側=がわ、測定値=そくていち、低=ひく、一方=いっぽう、最後=さいご、平均電力=へいきんでんりょく、差=さ、測定=そくてい、電力=でんりょく、記録=きろく、端末=たんまつ、充電中=じゅうでんちゅう、単体=たんたい、消費電力=しょうひでんりょく、電池寿命=でんちじゅみょう、数字=すうじ、示=しめ
+            </p>
+          </aside>
+        </section>
+
+        <section>
+          <h2>CPUとGPUの活動時間</h2>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="100%"
+            height="auto"
+            viewBox="0 0 1200 500"
+            role="img"
+            aria-labelledby="activity-chart-title activity-chart-description"
+            preserveAspectRatio="xMidYMid meet"
+          >
+            <title id="activity-chart-title">最後の5秒間のアプリCPU実行時間とGPU活動時間</title>
+            <desc id="activity-chart-description">
+              起動後18秒から23秒の区間で比較。アプリのCPU実行時間は通常表示が2.265 CPU秒、Liquid
+              Glassが6.576 CPU秒。GPU活動時間は通常表示が1.691秒、Liquid Glassが2.567秒。
+            </desc>
+            <g font-family="sans-serif" fill="#174029">
+              <circle cx="745" cy="38" r="10" fill="#2d9d5c" />
+              <text x="765" y="47" font-size="26">通常表示</text>
+              <circle cx="935" cy="38" r="10" fill="#ff1493" />
+              <text x="955" y="47" font-size="26">Liquid Glass</text>
+
+              <text x="60" y="91" font-size="25" font-weight="700">
+                アプリCPU実行時間（CPU秒 / 5秒）
+              </text>
+              <g font-size="20" fill="#2d9d5c" text-anchor="middle">
+                <text x="350" y="123">0</text>
+                <text x="510" y="123">2</text>
+                <text x="670" y="123">4</text>
+                <text x="830" y="123">6</text>
+              </g>
+              <g stroke="#174029" stroke-opacity="0.2" stroke-width="2">
+                <line x1="350" y1="132" x2="350" y2="222" />
+                <line x1="510" y1="132" x2="510" y2="222" />
+                <line x1="670" y1="132" x2="670" y2="222" />
+                <line x1="830" y1="132" x2="830" y2="222" />
+              </g>
+              <text x="70" y="164" font-size="22">通常表示</text>
+              <text x="70" y="204" font-size="22">Liquid Glass</text>
+              <rect x="350" y="145" width="181.2" height="24" rx="4" fill="#2d9d5c" />
+              <rect x="350" y="185" width="526.1" height="24" rx="4" fill="#ff1493" />
+              <text x="544" y="165" font-size="22" font-weight="700">2.265 CPU秒</text>
+              <text x="889" y="205" font-size="22" font-weight="700">6.576 CPU秒</text>
+
+              <text x="60" y="270" font-size="25" font-weight="700">
+                アプリのGPU活動時間（秒 / 5秒）
+              </text>
+              <g font-size="20" fill="#2d9d5c" text-anchor="middle">
+                <text x="350" y="302">0</text>
+                <text x="550" y="302">1</text>
+                <text x="750" y="302">2</text>
+                <text x="950" y="302">3</text>
+              </g>
+              <g stroke="#174029" stroke-opacity="0.2" stroke-width="2">
+                <line x1="350" y1="311" x2="350" y2="401" />
+                <line x1="550" y1="311" x2="550" y2="401" />
+                <line x1="750" y1="311" x2="750" y2="401" />
+                <line x1="950" y1="311" x2="950" y2="401" />
+              </g>
+              <text x="70" y="343" font-size="22">通常表示</text>
+              <text x="70" y="383" font-size="22">Liquid Glass</text>
+              <rect x="350" y="324" width="338.2" height="24" rx="4" fill="#2d9d5c" />
+              <rect x="350" y="364" width="513.4" height="24" rx="4" fill="#ff1493" />
+              <text x="701" y="344" font-size="22" font-weight="700">1.691秒</text>
+              <text x="876" y="384" font-size="22" font-weight="700">2.567秒</text>
+
+              <text x="60" y="444" font-size="19" fill="#2d9d5c">
+                CPU時間は複数スレッドの実行時間の合計。GPU活動時間とは単位・集計方法が異なる。
+              </text>
+              <text x="60" y="475" font-size="19" fill="#2d9d5c">
+                比較区間: アプリ起動後 +18〜+23秒。活動の増加は電力差の原因を単独で証明しない。
+              </text>
+            </g>
+          </svg>
+          <aside class="notes">
+            <p>電力差が大きかった最後の5秒について、アプリのCPUとGPUの活動を比べます。</p>
+            <p>
+              CPU実行時間は2.265 CPU秒から6.576
+              CPU秒に増えました。複数スレッドの実行時間を合計するため、5秒を超えることがあります。
+            </p>
+            <p>
+              GPU活動時間は1.691秒から2.567秒に増えています。CPUとGPUでは集計方法が異なるため、二つの数値を直接比べるものではありません。
+            </p>
+            <p>
+              これらは同じ時間帯に観測された変化です。Liquid
+              Glassだけが原因だと証明するものではありません。
+            </p>
+            <p class="furigana">
+              ふりがな:
+              電力差=でんりょくさ、大=おお、最後=さいご、秒=びょう、活動=かつどう、比=くら、実行時間=じっこうじかん、増=ふ、複数=ふくすう、合計=ごうけい、超=こ、集計方法=しゅうけいほうほう、異=こと、直接=ちょくせつ、数値=すうち、観測=かんそく、変化=へんか、原因=げんいん、証明=しょうめい
+            </p>
+          </aside>
+        </section>
+
+        <!-- <section>
+          <h2>大きく変わっているのが</h2>
+          <ul>
+            <li>アプリのCPU実行時間が増加</li>
+            <li>GPUの活動時間も増加</li>
+            <li>Rasterの平均描画時間: 3.69 ms から 6.02 ms</li>
+            <li><code>Canvas::saveLayer</code>: 11回から3,050回</li>
+          </ul>
+          <aside class="notes">
+            <p>最後の5秒では、アプリのCPU実行時間が大きく増えていました。</p>
+            <p>GPUの活動時間も増えています。</p>
+            <p>FlutterのRaster描画は、平均で3.69ミリ秒から6.02ミリ秒になりました。</p>
+            <p>また、記録されたCanvasのsaveLayer開始回数は11回から3,050回でした。</p>
+            <p>
+              これらは描画の仕事が増えた可能性を示す手がかりです。ただし、saveLayerの回数だけで原因やコストは決まりません。
+            </p>
+            <p>この手がかりから、次はLiquid Glassの描画の仕組みを見ます。</p>
+            <p class="furigana">
+              ふりがな:
+              最後=さいご、秒=びょう、実行時間=じっこうじかん、大=おお、増=ふ、活動時間=かつどうじかん、描画=びょうが、平均=へいきん、記録=きろく、開始回数=かいしかいすう、回=かい、仕事=しごと、可能性=かのうせい、示=しめ、手=て、回数=かいすう、原因=げんいん、決=き、次=つぎ、仕組=しく、見=み
+            </p>
+          </aside>
+        </section> -->
+
+        <section>
+          <h2>テスト結果まとめ</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>指標</th>
+                <th>区間</th>
+                <th>通常表示</th>
+                <th>Liquid Glass</th>
+                <th>差</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th>電力レールエネルギー</th>
+                <td>20秒</td>
+                <td>25.79 J</td>
+                <td>33.19 J</td>
+                <td>+28.7%</td>
+              </tr>
+              <tr>
+                <th>アプリCPU実行時間</th>
+                <td>最後の5秒</td>
+                <td>2.265 CPU秒</td>
+                <td>6.576 CPU秒</td>
+                <td>+190%</td>
+              </tr>
+              <tr>
+                <th>GPU活動時間</th>
+                <td>最後の5秒</td>
+                <td>1.691秒</td>
+                <td>2.567秒</td>
+                <td>+51.8%</td>
+              </tr>
+              <tr>
+                <th><code>Canvas::saveLayer</code>開始回数</th>
+                <td>最後の5秒</td>
+                <td>11回</td>
+                <td>3,050回</td>
+                <td>+3,039回</td>
+              </tr>
+            </tbody>
+          </table>
+          <p>最後の5秒: エネルギー差 +7.05 J（20秒間の純増分の約95%）</p>
+          <p>充電中の電力レール測定。アプリ単体の消費電力ではありません。</p>
+          <!-- <p>
+            充電中の電力レール測定。アプリ単体の消費電力ではなく、原因も未確定。
+          </p> -->
+          <aside class="notes">
+            <p>今回のテスト結果をまとめます。</p>
+            <p>
+              Pixel 9で同じHome画面を20秒ずつ比較し、測定した電力レールの合計はLiquid
+              Glass側が33.19ジュール、通常表示が25.79ジュールでした。
+            </p>
+            <p>
+              増加分の約95パーセントは最後の5秒に集中し、その時間帯にはアプリのCPUとGPU活動、FlutterのRaster描画時間も増えていました。
+            </p>
+            <p>
+              したがって、この記録では描画の仕事が増えた時間帯と電力レールの差が重なっています。ただし、二つの記録だけで原因を特定することはできません。
+            </p>
+            <p>
+              さらに両方とも充電中です。アプリ単体の消費電力や、電池寿命への影響として解釈しないようにします。
+            </p>
+            <p class="furigana">
+              ふりがな:
+              今回=こんかい、結果=けっか、同=おな、画面=がめん、起動=きどう、後=ご、秒=びょう、比較=ひかく、測定=そくてい、電力=でんりょく、合計=ごうけい、側=がわ、通常表示=つうじょうひょうじ、増加分=ぞうかぶん、最後=さいご、集中=しゅうちゅう、時間帯=じかんたい、活動=かつどう、描画=びょうが、重=かさ、原因=げんいん、特定=とくてい、充電中=じゅうでんちゅう、単体=たんたい、消費電力=しょうひでんりょく、電池寿命=でんちじゅみょう、影響=えいきょう、解釈=かいしゃく
+            </p>
+          </aside>
+        </section>
+
+        <section>
+          <p>皆さんに質問</p>
+          <ul>
+            <li>サクサク動くには何が必要なのか</li>
+            <li>サクサク動くだけで良いのか</li>
+            <li>開発者はエネルギー消費の理解は必要なのか</li>
+          </ul>
+
+          <aside class="notes">
+            <p>サクサク動くには何が必要なのか</p>
+            <p>サクサク動くだけで良いのか</p>
+            <p>開発者はエネルギー消費の理解は必要なのか</p>
+            <p class="furigana">
+              ふりがな:
+              皆さん=みなさん、質問=しつもん、動く=うごく、何=なに、必要=ひつよう、良い=よい、開発者=かいはつしゃ、消費=しょうひ、理解=りかい
+            </p>
+          </aside>
+        </section>
+
+        <!-- <section>
+          <h2>差の多くは、最後の5秒に出た</h2>
+          <ul>
+            <li>20秒全体の増加分: 約7.41 J</li>
+            <li>最後の5秒の増加分: 約7.05 J</li>
+            <li>この5秒の平均レール電力: 2.767 W 対 1.357 W</li>
+            <li>途中の10秒では、Liquid Glass側が低い</li>
+          </ul>
+          <aside class="notes">
+            <p>20秒全体では、差は約7.41ジュールでした。</p>
+            <p>そのうち約95パーセントは、最後の5秒に集まっていました。</p>
+            <p>この5秒の平均は、Liquid Glass側が2.767ワット、通常表示が1.357ワットです。</p>
+            <p>一方で、途中の10秒はLiquid Glass側の測定値が低くなっています。</p>
+            <p>
+              つまり、いつでも同じだけ増えるわけではありません。次は、最後の5秒で何が動いていたかを見ます。
+            </p>
+            <p class="furigana">
+              ふりがな:
+              秒=びょう、全体=ぜんたい、差=さ、約=やく、最後=さいご、集=あつ、平均=へいきん、側=がわ、通常表示=つうじょうひょうじ、一方=いっぽう、途中=とちゅう、測定値=そくていち、低=ひく、同=おな、増=ふ、次=つぎ、何=なに、動=うご、見=み
+            </p>
+          </aside>
+        </section> -->
+
+        <!-- <section>
+          <h2>測定から言えること、言えないこと</h2>
+          <ul>
+            <li>言えること: この記録ではCPU・GPU・描画の仕事が増えた</li>
+            <li>考えられること: 複雑な描画が差に関係した可能性がある</li>
+            <li>まだ言えないこと: BackdropFilterだけが原因だ</li>
+            <li>特定のshaderが電力を増やした、という証拠もない</li>
+          </ul>
+          <aside class="notes">
+            <p>ここで、測定結果と原因の説明を分けます。</p>
+            <p>記録からは、CPU、GPU、描画の仕事が増えたことを確認できます。</p>
+            <p>複雑な描画が関係した可能性はあります。</p>
+            <p>しかし、この記録だけでは、BackdropFilterだけが原因だとは言えません。</p>
+            <p>どのwidgetやshaderが差を作ったのかも、まだ分かっていません。</p>
+            <p>では、BackdropFilterはどんな仕事をするのでしょうか。</p>
+            <p class="furigana">
+              ふりがな:
+              測定結果=そくていけっか、原因=げんいん、説明=せつめい、分=わ、記録=きろく、描画=びょうが、仕事=しごと、増=ふ、確認=かくにん、複雑=ふくざつ、関係=かんけい、可能性=かのうせい、言=い、差=さ、作=つく
+            </p>
+          </aside>
+        </section> -->
+
+        <section>
+          <h2>エネルギーの基本</h2>
+          <ul>
+            <li>CPU: アプリの処理や画面の準備</li>
+            <li>GPU: 画像の合成や効果の計算</li>
+            <li>使用が長く続くほど、使うエネルギーも増えやすい</li>
+            <li>画面が滑らかかどうかだけでは、使用の量は分からない</li>
+          </ul>
+          <aside class="notes">
+            <p>まず大まかな仕組みを確認します。</p>
+            <p>CPUは、アプリの処理や画面を描くための準備をします。</p>
+            <p>GPUは、画像を合成したり、ぼかしなどの効果を計算したりします。</p>
+            <p>CPUやGPUが長く働けば、端末が使うエネルギーも増えることがあります。</p>
+            <p>ただし、処理の量だけで消費電力が正確に決まるわけではありません。</p>
+            <p>この考え方を、BackdropFilterの一つの例に当てはめます。</p>
+            <p class="furigana">
+              ふりがな:
+              大=おお、仕組=しく、確認=かくにん、処理=しょり、画面=がめん、描=えが、準備=じゅんび、画像=がぞう、合成=ごうせい、効果=こうか、計算=けいさん、長=なが、働=はたら、端末=たんまつ、使=つか、増=ふ、量=りょう、消費電力=しょうひでんりょく、正確=せいかく、決=き、考=かんが、方=かた、一=ひと、例=れい、当=あ
+            </p>
+          </aside>
+        </section>
+
+        <section>
+          <h2>BackdropFilterの裏側</h2>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="100%"
+            height="auto"
+            viewBox="0 0 1200 570"
+            role="img"
+            aria-labelledby="backdrop-sequence-title backdrop-sequence-description"
+            preserveAspectRatio="xMidYMid meet"
+          >
+            <title id="backdrop-sequence-title">FlutterのBackdropFilter描画シーケンス</title>
+            <desc id="backdrop-sequence-description">
+              背景を先に描画し、BackdropFilterの設定からRenderObject、Layer
+              treeへ処理を渡す。RasterizerはClipRectなどで制限された範囲の既描画ピクセルに画像フィルターを適用し、結果を合成してからBackdropFilterの子を前景として描画し、完成したフレームを表示する。
+            </desc>
+            <defs>
+              <marker
+                id="backdrop-arrow"
+                markerWidth="10"
+                markerHeight="10"
+                refX="8"
+                refY="5"
+                orient="auto"
+                markerUnits="strokeWidth"
+              >
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#174029" />
+              </marker>
+              <marker
+                id="backdrop-arrow-pink"
+                markerWidth="10"
+                markerHeight="10"
+                refX="8"
+                refY="5"
+                orient="auto"
+                markerUnits="strokeWidth"
+              >
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#d10b70" />
+              </marker>
+            </defs>
+            <g font-family="sans-serif" fill="#174029">
+              <g font-size="20" font-weight="700" text-anchor="middle">
+                <rect x="30" y="22" width="180" height="46" rx="6" fill="#e8f3e9" />
+                <text x="120" y="51">Widget tree</text>
+                <rect x="250" y="22" width="180" height="46" rx="6" fill="#e8f3e9" />
+                <text x="340" y="51">RenderObject</text>
+                <rect x="470" y="22" width="180" height="46" rx="6" fill="#e8f3e9" />
+                <text x="560" y="51">Layer tree</text>
+                <rect x="700" y="22" width="180" height="46" rx="6" fill="#e8f3e9" />
+                <text x="790" y="51">Rasterizer</text>
+                <rect x="970" y="22" width="180" height="46" rx="6" fill="#e8f3e9" />
+                <text x="1060" y="51">Display</text>
+              </g>
+
+              <g stroke="#174029" stroke-opacity="0.28" stroke-width="2" stroke-dasharray="6 7">
+                <line x1="120" y1="68" x2="120" y2="470" />
+                <line x1="340" y1="68" x2="340" y2="470" />
+                <line x1="560" y1="68" x2="560" y2="470" />
+                <line x1="790" y1="68" x2="790" y2="470" />
+                <line x1="1060" y1="68" x2="1060" y2="470" />
+              </g>
+
+              <g font-size="18" text-anchor="middle">
+                <text x="230" y="97">1. 先に描画された背景</text>
+                <text x="230" y="119" font-size="15">背後のwidgetがシーンに入る</text>
+                <line
+                  x1="120"
+                  y1="132"
+                  x2="560"
+                  y2="132"
+                  stroke="#174029"
+                  stroke-width="2"
+                  marker-end="url(#backdrop-arrow)"
+                />
+
+                <text x="230" y="157">2. ImageFilter.blur を設定</text>
+                <line
+                  x1="120"
+                  y1="170"
+                  x2="340"
+                  y2="170"
+                  stroke="#174029"
+                  stroke-width="2"
+                  marker-end="url(#backdrop-arrow)"
+                />
+
+                <text x="450" y="195">3. BackdropFilterLayer を追加</text>
+                <line
+                  x1="340"
+                  y1="208"
+                  x2="560"
+                  y2="208"
+                  stroke="#174029"
+                  stroke-width="2"
+                  marker-end="url(#backdrop-arrow)"
+                />
+
+                <text x="675" y="233">4. 描画命令をRasterへ</text>
+                <line
+                  x1="560"
+                  y1="246"
+                  x2="790"
+                  y2="246"
+                  stroke="#174029"
+                  stroke-width="2"
+                  marker-end="url(#backdrop-arrow)"
+                />
+              </g>
+
+              <rect
+                x="665"
+                y="263"
+                width="250"
+                height="54"
+                rx="6"
+                fill="#fff0f7"
+                stroke="#d10b70"
+                stroke-width="2"
+              />
+              <text x="790" y="286" font-size="17" font-weight="700" text-anchor="middle">
+                5. Clip内の既描画ピクセルを読む
+              </text>
+              <text x="790" y="307" font-size="16" text-anchor="middle">ImageFilterでぼかす</text>
+
+              <rect
+                x="665"
+                y="328"
+                width="250"
+                height="62"
+                rx="6"
+                fill="#fff0f7"
+                stroke="#d10b70"
+                stroke-width="2"
+              />
+              <text x="790" y="353" font-size="17" font-weight="700" text-anchor="middle">
+                6. フィルター結果を合成
+              </text>
+              <text x="790" y="377" font-size="16" text-anchor="middle">その上にchildを描く</text>
+              <line
+                x1="790"
+                y1="317"
+                x2="790"
+                y2="328"
+                stroke="#d10b70"
+                stroke-width="2"
+                marker-end="url(#backdrop-arrow-pink)"
+              />
+
+              <g font-size="18" text-anchor="middle">
+                <text x="925" y="414">7. 完成フレームを表示</text>
+                <line
+                  x1="790"
+                  y1="427"
+                  x2="1060"
+                  y2="427"
+                  stroke="#174029"
+                  stroke-width="2"
+                  marker-end="url(#backdrop-arrow)"
+                />
+              </g>
+
+              <rect x="35" y="451" width="1130" height="47" rx="6" fill="#e8f3e9" />
+              <text x="55" y="480" font-size="18" font-weight="700">ClipRectなど</text>
+              <text x="205" y="480" font-size="18">
+                フィルター範囲を制限。childの大きさだけで背景の処理範囲が決まるわけではない。
+              </text>
+
+              <text x="55" y="526" font-size="17" fill="#d10b70">
+                背景が変わると、次の描画でこの範囲のフィルター結果も更新されることがある。
+              </text>
+              <text x="55" y="552" font-size="16" fill="#174029">
+                Clipがない場合、フィルター範囲が画面全体に広がることがある。範囲と更新頻度が負荷に関係する。
+              </text>
+            </g>
+          </svg>
+          <aside class="notes">
+            <p>まず、BackdropFilterより後ろにあるwidgetが先に描画されます。</p>
+            <p>BackdropFilterはImageFilterをRenderObjectとLayer treeに渡します。</p>
+            <p>
+              RasterizerはClipRectなどで制限された範囲の、すでに描かれた背景を使ってフィルター結果を作ります。
+            </p>
+            <p>
+              その結果をblendModeに従って合成し、最後にBackdropFilterのchildを前景として描画します。
+            </p>
+            <p>
+              childの範囲と、フィルターが読む背景の範囲は同じとは限りません。範囲を制限するClipが重要です。
+            </p>
+            <p>
+              背景が変わればフィルター結果の更新が必要になることがあり、範囲や更新頻度が描画負荷に影響します。
+            </p>
+            <p>では、この仕事を実機の記録でどう確認するかを見ていきます。</p>
+            <p class="furigana">
+              ふりがな:
+              後=うし、先=さき、描画=びょうが、渡=わた、範囲=はんい、制限=せいげん、背景=はいけい、使=つか、結果=けっか、作=つく、従=したが、合成=ごうせい、最後=さいご、前景=ぜんけい、同=おな、重要=じゅうよう、変=か、更新=こうしん、必要=ひつよう、更新頻度=こうしんひんど、負荷=ふか、影響=えいきょう、実機=じっき、記録=きろく、確認=かくにん
+            </p>
+          </aside>
+        </section>
+
+        <section>
+          <h2>BackdropFilterとエネルギー</h2>
+          <table width="100%">
+            <tbody>
+              <tr>
+                <td width="30%">
+                  <img
+                    width="100%"
+                    src="./assets/261026/Screenshot 2026-10-20 at 0.01.27.png"
+                    alt="BackdropFilterの描画負荷を減らす方法を説明した資料"
+                  />
+                </td>
+                <td valign="top">
+                  <ul>
+                    <li>背景をコピーし、ぼかして重ねる</li>
+                    <li>背景が更新されると、もう一度処理することがある</li>
+                    <li>範囲やフィルター数が大きいほど、描画の仕事が増える</li>
+                    <li>CPU・GPUの仕事が続くと、電力も増えることがある</li>
+                  </ul>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <aside class="notes">
+            <p>
+              BackdropFilterは、ガラスの見た目だけではなく、後ろにある画面を使って効果を作る処理です。
+            </p>
+            <p>
+              まず、すでに描かれた背景を必要な範囲で取り込みます。その背景をぼかして画面に重ね、最後に子どものwidgetをその上に描きます。
+            </p>
+            <p>
+              背景が変わると、ぼかしの結果も更新する必要が出ることがあります。範囲が広い、フィルターが多い、更新が頻繁、といった場合は、コピーやぼかし、合成の仕事が増えます。
+            </p>
+            <p>
+              その仕事にはGPUの描画処理やメモリの読み書きが必要です。CPUもフレームの準備をします。仕事が長く続けば、端末が使うエネルギーも増える可能性があります。
+            </p>
+
+            <p class="furigana">
+              ふりがな:
+              見た目=みため、後ろ=うし、画面=がめん、使う=つか、効果=こうか、作る=つく、描く=えが、子ども=こども、変わる=か、結果=けっか、更新=こうしん、必要=ひつよう、範囲=はんい、広い=ひろ、多い=おお、頻繁=ひんぱん、場合=ばあい、仕事=しごと、合成=ごうせい、読み書き=よみかき、準備=じゅんび、長く=なが、続く=つづ、端末=たんまつ、使う=つか、可能性=かのうせい、今回=こんかい、最後=さいご、秒=びょう、側=がわ、通常表示=つうじょうひょうじ、それぞれ、同じ=おな、測定値=そくていち、示す=しめ、手がかり=てがかり、記録=きろく、原因=げんいん、特定=とくてい、両方=りょうほう、充電中=じゅうでんちゅう
+            </p>
+          </aside>
+        </section>
+
+        <section>
+          <h2>これで自分のアプリもプロファイルしたい気分になったのでしょうか</h2>
+
+          <aside class="notes">
+            <p>これで自分のアプリもプロファイルしたい気分になったのでしょうか</p>
+            <p>これからAndroidとiOSひとつずつのツールを紹介します</p>
+          </aside>
+        </section>
+
+        <section>
+          <h2>Android Performance Analyzer</h2>
+
+          <img src="./assets/261026/Screenshot 2026-10-18 at 13.56.15.png" alt="" />
+
+          <aside class="notes">
+            <p>Android Performance Analyzerは、Androidのtraceを読み解くためのツールです。</p>
+            <p>CPUや描画の動きをたどり、性能の問題がありそうな場所を調べる助けになります。</p>
+            <p class="furigana">
+              ふりがな:
+              読み解く=よみとく、動き=うご、性能=せいのう、問題=もんだい、場所=ばしょ、調べる=しら、助け=たす、電力=でんりょく、直接=ちょくせつ、測る=はか、分析=ぶんせき、補助=ほじょ、道具=どうぐ
+            </p>
+          </aside>
+        </section>
+
+        <section>
+          <h2>Xcode Instruments・Energy Log</h2>
+
+          <img src="./assets/261026/Screenshot 2026-10-20 at 0.13.03.png" alt="" />
+
+          <aside class="notes">
+            <p>iOSでは、Xcode InstrumentsのEnergy Logを使います。</p>
+            <p>アプリの動作によるエネルギーへの影響を、傾向として確認できます。</p>
+            <p>電力や電池寿命を直接測るものではないため、同じ端末・同じ操作で前後を比べます。</p>
+            <p>次に、比較条件をそろえる方法を見ます。</p>
+            <p class="furigana">
+              ふりがな:
+              動作=どうさ、影響=えいきょう、傾向=けいこう、確認=かくにん、電力=でんりょく、電池寿命=でんちじゅみょう、直接=ちょくせつ、測る=はか、同じ=おな、端末=たんまつ、操作=そうさ、前後=ぜんご、比べる=くら、次=つぎ、比較条件=ひかくじょうけん、方法=ほうほう、見る=み
+            </p>
+          </aside>
+        </section>
+
+        <section>
+          <h2>Macrobenchmarkを書く</h2>
+          <table width="100%">
+            <tbody>
+              <tr>
+                <td width="62%" valign="top">
+                  <pre><code class="language-kotlin">@get:Rule
+val benchmarkRule = MacrobenchmarkRule()
+
+@Test
+fun scrollHome() = benchmarkRule.measureRepeated(
+    packageName = "com.example.app",
+    metrics = listOf(FrameTimingMetric()),
+    iterations = 5,
+) {
+    startActivityAndWait()
+    device.findObject(By.res("home_list"))
+        .fling(Direction.DOWN)
+}</code></pre>
+                </td>
+                <td width="38%" valign="top">
+                  <ul>
+                    <li>専用のテストモジュールに書く</li>
+                    <li>UI Automatorでユーザー操作を再現する</li>
+                    <li>指標と反復回数を指定する</li>
+                    <li>実機で同じ条件を繰り返す</li>
+                  </ul>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p>各反復の結果: 指標のJSON + system trace（.perfetto-trace）</p>
+          <p>
+            <a href="https://developer.android.com/studio/profile/macrobenchmark?hl=ja"
+              >Macrobenchmarkの作成ガイド</a
+            >
+          </p>
+          <aside class="notes">
+            <p>
+              Macrobenchmarkでは、アプリ本体とは別のテストモジュールから、ユーザーと同じようにアプリを操作します。アプリ内部の関数を直接呼ぶのではなく、UI
+              Automatorで起動やスクロールを再現します。
+            </p>
+            <p>
+              measureRepeatedに対象アプリ、測りたい指標、反復回数を書きます。この例では、リストを5回スクロールし、FrameTimingMetricでフレーム性能を測ります。
+            </p>
+            <p>
+              ベンチマーク結果にはJSONの指標と、各反復のsystem
+              traceが含まれます。次のスライドでは、このtraceを分析する方法を見ます。
+            </p>
+            <p class="furigana">
+              ふりがな:
+              本体=ほんたい、別=べつ、テスト、同じ=おな、操作=そうさ、内部=ないぶ、関数=かんすう、直接=ちょくせつ、呼ぶ=よ、起動=きどう、反復回数=はんぷくかいすう、例=れい、回=かい、測る=はか、結果=けっか、各=かく、分析=ぶんせき、方法=ほうほう、見=み
+            </p>
+          </aside>
+        </section>
+
+        <section>
+          <h2>System traceをAIと読み解く</h2>
+          <ol>
+            <li>Macrobenchmarkの各反復から <code>.perfetto-trace</code> を得る</li>
+            <li>Android StudioやAndroid Performance Analyzerでtraceを開く</li>
+            <li>Android profiler skillに質問し、見る場所やPerfettoSQLを探す</li>
+            <li>提案をtrace上で確認し、原因を決めつけない</li>
+          </ol>
+          <p><code>android skills add android-profiler</code></p>
+          <p>
+            <a
+              href="https://developer.android.com/android-performance-analyzer/analyze/ai#ai-analysis"
+              >AIによるtrace分析ガイド</a
+            >
+          </p>
+          <aside class="notes">
+            <p>
+              Macrobenchmarkは、指標だけでなく、反復ごとのsystem
+              traceも出力します。traceを開くと、測定中にCPUや描画などで何が起きたかを時間軸で調べられます。
+            </p>
+            <p>
+              Android Performance AnalyzerのAI分析ガイドでは、Android profiler
+              skillを使い、自然な言葉で質問してtraceの見どころを探したり、PerfettoSQLの作成を助けてもらったりできます。
+            </p>
+            <p>
+              これは調査の出発点です。AIの説明やクエリ結果はtraceと照らし合わせて確認します。観測が同時に起きたことだけで原因とは言えません。
+            </p>
+            <p>
+              Android Performance
+              Analyzerは主にゲームやVulkanの分析向けです。それ以外のアプリでは、Android
+              Studioのプロファイラを使います。
+            </p>
+            <p class="furigana">
+              ふりがな:
+              指標=しひょう、反復=はんぷく、出力=しゅつりょく、測定中=そくていちゅう、何=なに、起=お、時間軸=じかんじく、調べる=しら、自然=しぜん、言葉=ことば、質問=しつもん、見=みどころ、作成=さくせい、助=たす、出発点=しゅっぱつてん、説明=せつめい、結果=けっか、照=て、確認=かくにん、観測=かんそく、同時=どうじ、原因=げんいん、主=おも、分析向け=ぶんせきむけ、それ以外=いがい、使う=つか
+            </p>
+          </aside>
+        </section>
+
+        <section>
+          <h2>今日のまとめ</h2>
+          <ul>
+            <li>20秒の電力レール合計: 33.19 J（Liquid Glass）/ 25.79 J（通常表示）</li>
+            <li>差の約95%は最後の5秒。CPU・GPU活動と描画時間も増加</li>
+            <li>BackdropFilterの描画仕事は電力に影響があり</li>
+            <li>Macrobenchmarkの反復ごとにsystem traceを取得し、分析できる</li>
+          </ul>
+          <aside class="notes">
+            <p>最後に、今回の測定とベンチマークの要点を振り返ります。</p>
+            <p>
+              20秒間の電力レール合計は、Liquid
+              Glassが33.19ジュール、通常表示が25.79ジュールでした。差の約95パーセントは最後の5秒に集中していました。
+            </p>
+            <p>
+              同じ時間帯にCPU・GPU活動や描画時間も増えました。BackdropFilterの仕事が関係した可能性はありますが、この記録だけでは原因を特定できません。
+            </p>
+            <p>Macrobenchmarkではユーザー操作を繰り返し、各反復のsystem traceを分析に使えます。</p>
+            <p>ご清聴ありがとうございました。</p>
+            <p class="furigana">
+              ふりがな:
+              最後=さいご、今回=こんかい、測定=そくてい、要点=ようてん、振り返る=ふりかえ、間=かん、合計=ごうけい、通常表示=つうじょうひょうじ、差=さ、約=やく、最後=さいご、秒=びょう、集中=しゅうちゅう、同じ=おな、時間帯=じかんたい、活動=かつどう、描画時間=びょうがじかん、増える=ふ、仕事=しごと、関係=かんけい、可能性=かのうせい、記録=きろく、原因=げんいん、特定=とくてい、操作=そうさ、繰り返す=くりかえ、各=かく、反復=はんぷく、分析=ぶんせき、両方=りょうほう、充電中=じゅうでんちゅう、行う=おこな、単体=たんたい、消費電力=しょうひでんりょく、清聴=せいちょう
+            </p>
+          </aside>
+        </section>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/dist/reveal.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/plugin/notes/notes.js"></script>
+    <script>
+      Reveal.initialize({
+        hash: true,
+        slideNumber: "c/t",
+        controls: true,
+        progress: true,
+        transition: "fade",
+        transitionSpeed: "fast",
+        plugins: [RevealNotes],
+      })
+    </script>
+  </body>
+</html>

@@ -357,13 +357,7 @@ body,
 .reveal .badge {
   align-self: center;
   display: block;
-  font-family: var(
-    --r-code-font,
-    "IBM Plex Mono",
-    ui-monospace,
-    SFMono-Regular,
-    monospace
-  );
+  font-family: var(--r-code-font, "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace);
   font-size: 0.55em;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -534,13 +528,7 @@ body,
 .reveal .code-meta,
 .reveal .code-label {
   color: var(--talk-muted, var(--muted-ink));
-  font-family: var(
-    --r-code-font,
-    "IBM Plex Mono",
-    ui-monospace,
-    SFMono-Regular,
-    monospace
-  );
+  font-family: var(--r-code-font, "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace);
 }
 
 .reveal .hero-meta {
@@ -627,13 +615,7 @@ body,
 
 .reveal .slide-sources {
   color: var(--talk-muted, var(--muted-ink));
-  font-family: var(
-    --r-code-font,
-    "IBM Plex Mono",
-    ui-monospace,
-    SFMono-Regular,
-    monospace
-  );
+  font-family: var(--r-code-font, "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace);
   font-size: 0.38em;
   line-height: 1.4;
   margin: auto auto 0;
@@ -677,13 +659,7 @@ body,
 
 .reveal .chip-meta {
   color: var(--talk-muted, var(--muted-ink));
-  font-family: var(
-    --r-code-font,
-    "IBM Plex Mono",
-    ui-monospace,
-    SFMono-Regular,
-    monospace
-  );
+  font-family: var(--r-code-font, "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace);
   font-size: 0.7em;
 }
 
