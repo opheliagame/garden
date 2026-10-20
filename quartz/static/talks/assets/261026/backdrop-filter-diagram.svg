@@ -1,0 +1,175 @@
+<svg
+            class="process-diagram"
+            xmlns="http://www.w3.org/2000/svg"
+            width="1200"
+            height="570"
+            viewBox="0 0 1200 570"
+            role="img"
+            aria-labelledby="backdrop-sequence-title backdrop-sequence-description"
+            preserveAspectRatio="xMidYMid meet"
+          >
+            <rect width="100%" height="100%" fill="#FFFAFA" />
+            <title id="backdrop-sequence-title">FlutterのBackdropFilter描画シーケンス</title>
+            <desc id="backdrop-sequence-description">
+              背景を先に描画し、BackdropFilterの設定からRenderObject、Layer
+              treeへ処理を渡す。RasterizerはClipRectなどで制限された範囲の既描画ピクセルに画像フィルターを適用し、結果を合成してからBackdropFilterの子を前景として描画し、完成したフレームを表示する。
+            </desc>
+            <defs>
+              <marker
+                id="backdrop-arrow"
+                markerWidth="10"
+                markerHeight="10"
+                refX="8"
+                refY="5"
+                orient="auto"
+                markerUnits="strokeWidth"
+              >
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#174029" />
+              </marker>
+              <marker
+                id="backdrop-arrow-pink"
+                markerWidth="10"
+                markerHeight="10"
+                refX="8"
+                refY="5"
+                orient="auto"
+                markerUnits="strokeWidth"
+              >
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#d10b70" />
+              </marker>
+            </defs>
+            <g font-family="sans-serif" fill="#174029">
+              <g font-size="20" font-weight="700" text-anchor="middle">
+                <rect x="30" y="22" width="180" height="46" rx="6" fill="#e8f3e9" />
+                <text x="120" y="51">Widget tree</text>
+                <rect x="250" y="22" width="180" height="46" rx="6" fill="#e8f3e9" />
+                <text x="340" y="51">RenderObject</text>
+                <rect x="470" y="22" width="180" height="46" rx="6" fill="#e8f3e9" />
+                <text x="560" y="51">Layer tree</text>
+                <rect x="700" y="22" width="180" height="46" rx="6" fill="#e8f3e9" />
+                <text x="790" y="51">Rasterizer</text>
+                <rect x="970" y="22" width="180" height="46" rx="6" fill="#e8f3e9" />
+                <text x="1060" y="51">Display</text>
+              </g>
+
+              <g stroke="#174029" stroke-opacity="0.28" stroke-width="2" stroke-dasharray="6 7">
+                <line x1="120" y1="68" x2="120" y2="470" />
+                <line x1="340" y1="68" x2="340" y2="470" />
+                <line x1="560" y1="68" x2="560" y2="470" />
+                <line x1="790" y1="68" x2="790" y2="470" />
+                <line x1="1060" y1="68" x2="1060" y2="470" />
+              </g>
+
+              <g font-size="18" text-anchor="middle">
+                <text x="230" y="97">1. 先に描画された背景</text>
+                <text x="230" y="119" font-size="15">背後のwidgetがシーンに入る</text>
+                <line
+                  x1="120"
+                  y1="132"
+                  x2="560"
+                  y2="132"
+                  stroke="#174029"
+                  stroke-width="2"
+                  marker-end="url(#backdrop-arrow)"
+                />
+
+                <text x="230" y="157">2. ImageFilter.blur を設定</text>
+                <line
+                  x1="120"
+                  y1="170"
+                  x2="340"
+                  y2="170"
+                  stroke="#174029"
+                  stroke-width="2"
+                  marker-end="url(#backdrop-arrow)"
+                />
+
+                <text x="450" y="195">3. BackdropFilterLayer を追加</text>
+                <line
+                  x1="340"
+                  y1="208"
+                  x2="560"
+                  y2="208"
+                  stroke="#174029"
+                  stroke-width="2"
+                  marker-end="url(#backdrop-arrow)"
+                />
+
+                <text x="675" y="233">4. 描画命令をRasterへ</text>
+                <line
+                  x1="560"
+                  y1="246"
+                  x2="790"
+                  y2="246"
+                  stroke="#174029"
+                  stroke-width="2"
+                  marker-end="url(#backdrop-arrow)"
+                />
+              </g>
+
+              <rect
+                x="665"
+                y="263"
+                width="250"
+                height="54"
+                rx="6"
+                fill="#fff0f7"
+                stroke="#d10b70"
+                stroke-width="2"
+              />
+              <text x="790" y="286" font-size="17" font-weight="700" text-anchor="middle">
+                5. Clip内の既描画ピクセルを読む
+              </text>
+              <text x="790" y="307" font-size="16" text-anchor="middle">ImageFilterでぼかす</text>
+
+              <rect
+                x="665"
+                y="328"
+                width="250"
+                height="62"
+                rx="6"
+                fill="#fff0f7"
+                stroke="#d10b70"
+                stroke-width="2"
+              />
+              <text x="790" y="353" font-size="17" font-weight="700" text-anchor="middle">
+                6. フィルター結果を合成
+              </text>
+              <text x="790" y="377" font-size="16" text-anchor="middle">その上にchildを描く</text>
+              <line
+                x1="790"
+                y1="317"
+                x2="790"
+                y2="328"
+                stroke="#d10b70"
+                stroke-width="2"
+                marker-end="url(#backdrop-arrow-pink)"
+              />
+
+              <g font-size="18" text-anchor="middle">
+                <text x="925" y="414">7. 完成フレームを表示</text>
+                <line
+                  x1="790"
+                  y1="427"
+                  x2="1060"
+                  y2="427"
+                  stroke="#174029"
+                  stroke-width="2"
+                  marker-end="url(#backdrop-arrow)"
+                />
+              </g>
+
+              <rect x="35" y="451" width="1130" height="47" rx="6" fill="#e8f3e9" />
+              <text x="55" y="480" font-size="18" font-weight="700">ClipRectなど</text>
+              <text x="205" y="480" font-size="18">
+                フィルター範囲を制限。childの大きさだけで背景の処理範囲が決まるわけではない。
+              </text>
+
+              <text x="55" y="526" font-size="17" fill="#d10b70">
+                背景が変わると、次の描画でこの範囲のフィルター結果も更新されることがある。
+              </text>
+              <text x="55" y="552" font-size="16" fill="#174029">
+                Clipがない場合、フィルター範囲が画面全体に広がることがある。範囲と更新頻度が負荷に関係する。
+              </text>
+            </g>
+          </svg>

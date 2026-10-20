@@ -49,11 +49,6 @@ body,
   text-transform: none;
 }
 
-.reveal h2 {
-  border-left: 0.18em solid var(--pink);
-  padding-left: 0.35em;
-}
-
 .reveal h3 {
   color: var(--muted-ink);
 }

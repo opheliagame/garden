@@ -1,0 +1,73 @@
+<svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="1200"
+            height="500"
+            viewBox="0 0 1200 500"
+            role="img"
+            aria-labelledby="activity-chart-title activity-chart-description"
+            preserveAspectRatio="xMidYMid meet"
+          >
+            <rect width="100%" height="100%" fill="#FFFAFA" />
+            <title id="activity-chart-title">最後の5秒間のアプリCPU実行時間とGPU活動時間</title>
+            <desc id="activity-chart-description">
+              起動後18秒から23秒の区間で比較。アプリのCPU実行時間は通常表示が2.265 CPU秒、Liquid
+              Glassが6.576 CPU秒。GPU活動時間は通常表示が1.691秒、Liquid Glassが2.567秒。
+            </desc>
+            <g font-family="sans-serif" fill="#174029">
+              <circle cx="745" cy="38" r="10" fill="#2d9d5c" />
+              <text x="765" y="47" font-size="26">通常表示</text>
+              <circle cx="935" cy="38" r="10" fill="#ff1493" />
+              <text x="955" y="47" font-size="26">Liquid Glass</text>
+
+              <text x="60" y="91" font-size="25" font-weight="700">
+                アプリCPU実行時間（CPU秒 / 5秒）
+              </text>
+              <g font-size="20" fill="#2d9d5c" text-anchor="middle">
+                <text x="350" y="123">0</text>
+                <text x="510" y="123">2</text>
+                <text x="670" y="123">4</text>
+                <text x="830" y="123">6</text>
+              </g>
+              <g stroke="#174029" stroke-opacity="0.2" stroke-width="2">
+                <line x1="350" y1="132" x2="350" y2="222" />
+                <line x1="510" y1="132" x2="510" y2="222" />
+                <line x1="670" y1="132" x2="670" y2="222" />
+                <line x1="830" y1="132" x2="830" y2="222" />
+              </g>
+              <text x="70" y="164" font-size="22">通常表示</text>
+              <text x="70" y="204" font-size="22">Liquid Glass</text>
+              <rect x="350" y="145" width="181.2" height="24" rx="4" fill="#2d9d5c" />
+              <rect x="350" y="185" width="526.1" height="24" rx="4" fill="#ff1493" />
+              <text x="544" y="165" font-size="22" font-weight="700">2.265 CPU秒</text>
+              <text x="889" y="205" font-size="22" font-weight="700">6.576 CPU秒</text>
+
+              <text x="60" y="270" font-size="25" font-weight="700">
+                アプリのGPU活動時間（秒 / 5秒）
+              </text>
+              <g font-size="20" fill="#2d9d5c" text-anchor="middle">
+                <text x="350" y="302">0</text>
+                <text x="550" y="302">1</text>
+                <text x="750" y="302">2</text>
+                <text x="950" y="302">3</text>
+              </g>
+              <g stroke="#174029" stroke-opacity="0.2" stroke-width="2">
+                <line x1="350" y1="311" x2="350" y2="401" />
+                <line x1="550" y1="311" x2="550" y2="401" />
+                <line x1="750" y1="311" x2="750" y2="401" />
+                <line x1="950" y1="311" x2="950" y2="401" />
+              </g>
+              <text x="70" y="343" font-size="22">通常表示</text>
+              <text x="70" y="383" font-size="22">Liquid Glass</text>
+              <rect x="350" y="324" width="338.2" height="24" rx="4" fill="#2d9d5c" />
+              <rect x="350" y="364" width="513.4" height="24" rx="4" fill="#ff1493" />
+              <text x="701" y="344" font-size="22" font-weight="700">1.691秒</text>
+              <text x="876" y="384" font-size="22" font-weight="700">2.567秒</text>
+
+              <text x="60" y="444" font-size="19" fill="#2d9d5c">
+                CPU時間は複数スレッドの実行時間の合計。GPU活動時間とは単位・集計方法が異なる。
+              </text>
+              <text x="60" y="475" font-size="19" fill="#2d9d5c">
+                比較区間: アプリ起動後 +18〜+23秒。活動の増加は電力差の原因を単独で証明しない。
+              </text>
+            </g>
+          </svg>

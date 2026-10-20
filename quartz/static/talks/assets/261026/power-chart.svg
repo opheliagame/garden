@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="500" viewBox="0 0 1200 500" role="img"
+  aria-labelledby="power-chart-title power-chart-description" preserveAspectRatio="xMidYMid meet">
+  <rect width="100%" height="100%" fill="#FFFAFA" />
+  <title id="power-chart-title">5秒ごとの測定電力レール平均値</title>
+  <desc id="power-chart-description">
+    通常表示とLiquid
+    Glassの平均電力を、アプリ起動後3秒から23秒まで5秒ごとに比較。最後の5秒でLiquid
+    Glassが2.767ワット、通常表示が1.357ワット。差の約95パーセントがこの区間に発生。
+  </desc>
+  <g font-family="sans-serif" fill="#174029">
+    <circle cx="745" cy="38" r="10" fill="#2d9d5c" />
+    <text x="765" y="47" font-size="26">通常表示</text>
+    <circle cx="935" cy="38" r="10" fill="#ff1493" />
+    <text x="955" y="47" font-size="26">Liquid Glass</text>
+
+    <text x="60" y="88" font-size="23" fill="#2d9d5c">起動から</text>
+    <text x="350" y="88" font-size="23" fill="#2d9d5c">平均電力（W）</text>
+    <g font-size="22" fill="#2d9d5c" text-anchor="middle">
+      <text x="350" y="118">0</text>
+      <text x="550" y="118">1</text>
+      <text x="750" y="118">2</text>
+      <text x="950" y="118">3</text>
+    </g>
+
+    <rect x="40" y="347" width="1120" height="78" rx="8" fill="#fff0f7" />
+    <g stroke="#174029" stroke-opacity="0.2" stroke-width="2">
+      <line x1="350" y1="128" x2="350" y2="425" />
+      <line x1="550" y1="128" x2="550" y2="425" />
+      <line x1="750" y1="128" x2="750" y2="425" />
+      <line x1="950" y1="128" x2="950" y2="425" />
+    </g>
+
+    <g font-size="26">
+      <text x="60" y="170">+3–8秒</text>
+      <text x="60" y="247">+8–13秒</text>
+      <text x="60" y="324">+13–18秒</text>
+      <text x="60" y="401" font-weight="700">+18–23秒</text>
+    </g>
+    <g font-size="21" fill="#2d9d5c">
+      <text x="245" y="157">通常</text>
+      <text x="245" y="179">Glass</text>
+      <text x="245" y="234">通常</text>
+      <text x="245" y="256">Glass</text>
+      <text x="245" y="311">通常</text>
+      <text x="245" y="333">Glass</text>
+      <text x="245" y="388">通常</text>
+      <text x="245" y="410">Glass</text>
+    </g>
+
+    <g fill="#2d9d5c">
+      <rect x="350" y="143" width="339.6" height="16" rx="3" />
+      <rect x="350" y="220" width="188" height="16" rx="3" />
+      <rect x="350" y="297" width="232.4" height="16" rx="3" />
+      <rect x="350" y="374" width="271.4" height="16" rx="3" />
+    </g>
+    <g fill="#ff1493">
+      <rect x="350" y="165" width="431.2" height="16" rx="3" />
+      <rect x="350" y="242" width="175.2" height="16" rx="3" />
+      <rect x="350" y="319" width="167.8" height="16" rx="3" />
+      <rect x="350" y="396" width="553.4" height="16" rx="3" />
+    </g>
+
+    <g font-size="22" font-weight="700">
+      <text x="704" y="158">1.698 W</text>
+      <text x="796" y="180">2.156 W</text>
+      <text x="552" y="235">0.940 W</text>
+      <text x="539" y="257">0.876 W</text>
+      <text x="596" y="312">1.162 W</text>
+      <text x="532" y="334">0.839 W</text>
+      <text x="635" y="389">1.357 W</text>
+      <text x="917" y="411">2.767 W</text>
+    </g>
+
+    <!-- <text x="60" y="464" font-size="24" font-weight="700" fill="#ff1493">
+                最後の5秒: +7.05 J（20秒間の純増分の約95%）
+              </text>
+              <text x="60" y="492" font-size="18" fill="#2d9d5c">
+                測定した24本の電力レールの平均値。両方の記録で端末は充電中。
+              </text> -->
+  </g>
+</svg>

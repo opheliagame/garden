@@ -20,6 +20,18 @@
     <link rel="stylesheet" href="./normalize.css" />
     <link rel="stylesheet" href="./style.css" />
     <style>
+      :root {
+        --paper: #218821;
+        --paper-muted: #24583c;
+        --gray: #e5e5e5;
+        --muted-ink: #e5e5e5;
+        --ink: #e5e5e5;
+        --pink: #ffff00;
+        --yellow: #ffff00;
+        --highlight: #ffff00;
+        /* --highlight: rgba(255, 0, 0, 0.12); */
+      }
+
       .reveal,
       .reveal h1,
       .reveal h2,
@@ -30,15 +42,93 @@
       * {
         font-family: "Kosugi Maru", sans-serif;
       }
+
+      .reveal mark,
+      .reveal .important {
+        background: var(--highlight);
+        color: var(--ink);
+        text-decoration: underline;
+        text-decoration-color: #ffff00;
+        text-underline-offset: 0.12em;
+      }
+
+      .reveal .chart-svg {
+        display: block;
+        height: auto;
+        margin: 0 auto;
+        max-height: 62vh;
+        object-fit: contain;
+        width: 100%;
+      }
+
+      .reveal h1 {
+        font-size: 4rem;
+      }
+
+      .reveal .slides > .energy-slide h1 {
+        font-size: 3.6rem;
+      }
+
+      .reveal h2 {
+        font-size: x-large;
+        text-align: left;
+        padding: 0 0 4rem 2rem;
+      }
+
+      .reveal h3 {
+        font-size: large;
+      }
+
+      .highlight {
+        color: var(--highlight);
+      }
+
+      .intro-scatter {
+        inset: 0;
+        pointer-events: none;
+        position: fixed;
+        z-index: 1;
+      }
+
+      .intro-scatter img {
+        max-width: none;
+        opacity: 0.4;
+        position: absolute;
+        transform: translate(-50%, -50%) rotate(var(--rotation));
+        width: clamp(64px, min(13vw, 16vh), 190px);
+      }
+
+      .intro-content {
+        position: relative;
+        z-index: 1;
+      }
+
+      .reveal {
+        position: relative;
+        z-index: 2;
+      }
+
+      .reveal .slides section a,
+      .reveal .slides section a:visited,
+      .reveal .slides section a:hover,
+      .reveal .slides section a:focus,
+      .reveal .slides section a:active {
+        font-size: medium;
+        color: var(--highlight);
+        text-decoration-color: var(--highlight);
+        text-decoration-line: underline;
+        /* text-decoration-style: wavy; */
+        /* text-underline-offset: 0.12em; */
+      }
     </style>
   </head>
   <body>
     <div class="reveal">
       <div class="slides">
         <section>
-          <h1>画面の滑らかさの裏側：DevToolsから考えるFlutterアプリのバッテリー消費と最適化</h1>
+          <h1>画面の滑らかさの裏側<br />DevToolsから考えるFlutterアプリのバッテリー消費と最適化</h1>
           <h3>Behind Smooth Scrolling: Evaluating Flutter App Battery Consumption via DevTools</h3>
-          <p>anushka・opheliagame・アン</p>
+          <p class="highlight">anushka・opheliagame・アン</p>
           <aside class="notes">
             <p>今日は、画面の滑らかさと電池の使い方について話します。</p>
             <p>きっかけは、FlutterのLiquid Glassを使った画面を実機で測ったことです。</p>
@@ -49,16 +139,18 @@
             </p>
           </aside>
         </section>
-        <section>
-          <h2>自己紹介</h2>
-          <ul>
-            <li>インド出身</li>
-            <li>flutter engineer 5年目</li>
-            <li>teamlab チームラボ 2年目</li>
-            <li>creative coding #p5.js</li>
-            <li>live coding #hydra #glsl</li>
-            <li>モノづくり 木工初心者</li>
-          </ul>
+        <section class="intro-slide">
+          <div class="intro-content">
+            <h2>自己紹介</h2>
+            <ul>
+              <li>インド出身</li>
+              <li>flutter engineer 5年目</li>
+              <li>teamlab チームラボ 2年目</li>
+              <li>creative coding #p5.js</li>
+              <li>live coding #hydra #glsl</li>
+              <li>モノづくり 木工初心者</li>
+            </ul>
+          </div>
           <aside class="notes">
             <p>インド出身で、Flutter Engineerとして5年目になります。</p>
             <p>仕事ではFlutterを書いています。creative codingも好きです。</p>
@@ -72,7 +164,7 @@
         </section>
 
         <section>
-          <h1>画面の滑らかさの裏側：DevToolsから考えるFlutterアプリのバッテリー消費と最適化</h1>
+          <h1>画面の滑らかさの裏側<br />DevToolsから考えるFlutterアプリのバッテリー消費と最適化</h1>
 
           <!-- <ul>
             <li>滑らかな画面なら、電池にもやさしいでしょうか</li>
@@ -102,9 +194,11 @@
         </section>
 
         <section>
-          <!-- convert into text scattered in background -->
-          <p>Flutter・Liquid Glass・エネルギー</p>
-          <img src="./assets/261026/hero_row2.webp" alt="" />
+          <img
+            style="height: 80vh; max-height: 80vh; object-fit: contain"
+            src="./assets/261026/hero_row2.webp"
+            alt=""
+          />
 
           <aside class="notes">
             <p>LGを一つの例としてみていきましょう</p>
@@ -122,8 +216,8 @@
           </aside>
         </section>
 
-        <section>
-          <p>Flutter・Liquid Glass・エネルギー</p>
+        <section class="energy-slide">
+          <p>Flutter 🤝 Liquid Glass → エネルギー？</p>
           <h1>エネルギーパーフォマンスはどうでしょう</h1>
 
           <aside class="notes">
@@ -164,93 +258,7 @@
 
         <section>
           <h2>エネルギー消費</h2>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="100%"
-            height="auto"
-            viewBox="0 0 1200 500"
-            role="img"
-            aria-labelledby="power-chart-title power-chart-description"
-            preserveAspectRatio="xMidYMid meet"
-          >
-            <title id="power-chart-title">5秒ごとの測定電力レール平均値</title>
-            <desc id="power-chart-description">
-              通常表示とLiquid
-              Glassの平均電力を、アプリ起動後3秒から23秒まで5秒ごとに比較。最後の5秒でLiquid
-              Glassが2.767ワット、通常表示が1.357ワット。差の約95パーセントがこの区間に発生。
-            </desc>
-            <g font-family="sans-serif" fill="#174029">
-              <circle cx="745" cy="38" r="10" fill="#2d9d5c" />
-              <text x="765" y="47" font-size="26">通常表示</text>
-              <circle cx="935" cy="38" r="10" fill="#ff1493" />
-              <text x="955" y="47" font-size="26">Liquid Glass</text>
-
-              <text x="60" y="88" font-size="23" fill="#2d9d5c">起動から</text>
-              <text x="350" y="88" font-size="23" fill="#2d9d5c">平均電力（W）</text>
-              <g font-size="22" fill="#2d9d5c" text-anchor="middle">
-                <text x="350" y="118">0</text>
-                <text x="550" y="118">1</text>
-                <text x="750" y="118">2</text>
-                <text x="950" y="118">3</text>
-              </g>
-
-              <rect x="40" y="347" width="1120" height="78" rx="8" fill="#fff0f7" />
-              <g stroke="#174029" stroke-opacity="0.2" stroke-width="2">
-                <line x1="350" y1="128" x2="350" y2="425" />
-                <line x1="550" y1="128" x2="550" y2="425" />
-                <line x1="750" y1="128" x2="750" y2="425" />
-                <line x1="950" y1="128" x2="950" y2="425" />
-              </g>
-
-              <g font-size="26">
-                <text x="60" y="170">+3–8秒</text>
-                <text x="60" y="247">+8–13秒</text>
-                <text x="60" y="324">+13–18秒</text>
-                <text x="60" y="401" font-weight="700">+18–23秒</text>
-              </g>
-              <g font-size="21" fill="#2d9d5c">
-                <text x="245" y="157">通常</text>
-                <text x="245" y="179">Glass</text>
-                <text x="245" y="234">通常</text>
-                <text x="245" y="256">Glass</text>
-                <text x="245" y="311">通常</text>
-                <text x="245" y="333">Glass</text>
-                <text x="245" y="388">通常</text>
-                <text x="245" y="410">Glass</text>
-              </g>
-
-              <g fill="#2d9d5c">
-                <rect x="350" y="143" width="339.6" height="16" rx="3" />
-                <rect x="350" y="220" width="188" height="16" rx="3" />
-                <rect x="350" y="297" width="232.4" height="16" rx="3" />
-                <rect x="350" y="374" width="271.4" height="16" rx="3" />
-              </g>
-              <g fill="#ff1493">
-                <rect x="350" y="165" width="431.2" height="16" rx="3" />
-                <rect x="350" y="242" width="175.2" height="16" rx="3" />
-                <rect x="350" y="319" width="167.8" height="16" rx="3" />
-                <rect x="350" y="396" width="553.4" height="16" rx="3" />
-              </g>
-
-              <g font-size="22" font-weight="700">
-                <text x="704" y="158">1.698 W</text>
-                <text x="796" y="180">2.156 W</text>
-                <text x="552" y="235">0.940 W</text>
-                <text x="539" y="257">0.876 W</text>
-                <text x="596" y="312">1.162 W</text>
-                <text x="532" y="334">0.839 W</text>
-                <text x="635" y="389">1.357 W</text>
-                <text x="917" y="411">2.767 W</text>
-              </g>
-
-              <text x="60" y="464" font-size="24" font-weight="700" fill="#ff1493">
-                最後の5秒: +7.05 J（20秒間の純増分の約95%）
-              </text>
-              <text x="60" y="492" font-size="18" fill="#2d9d5c">
-                測定した24本の電力レールの平均値。両方の記録で端末は充電中。
-              </text>
-            </g>
-          </svg>
+          <img class="chart-svg" src="./assets/261026/power-chart.svg" alt="平均電力の比較グラフ" />
           <aside class="notes">
             <p>20秒の平均だけでは見えにくいので、5秒ずつに分けました。</p>
             <p>途中の10秒では、Liquid Glass側の測定値が低くなっています。</p>
@@ -269,78 +277,11 @@
 
         <section>
           <h2>CPUとGPUの活動時間</h2>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="100%"
-            height="auto"
-            viewBox="0 0 1200 500"
-            role="img"
-            aria-labelledby="activity-chart-title activity-chart-description"
-            preserveAspectRatio="xMidYMid meet"
-          >
-            <title id="activity-chart-title">最後の5秒間のアプリCPU実行時間とGPU活動時間</title>
-            <desc id="activity-chart-description">
-              起動後18秒から23秒の区間で比較。アプリのCPU実行時間は通常表示が2.265 CPU秒、Liquid
-              Glassが6.576 CPU秒。GPU活動時間は通常表示が1.691秒、Liquid Glassが2.567秒。
-            </desc>
-            <g font-family="sans-serif" fill="#174029">
-              <circle cx="745" cy="38" r="10" fill="#2d9d5c" />
-              <text x="765" y="47" font-size="26">通常表示</text>
-              <circle cx="935" cy="38" r="10" fill="#ff1493" />
-              <text x="955" y="47" font-size="26">Liquid Glass</text>
-
-              <text x="60" y="91" font-size="25" font-weight="700">
-                アプリCPU実行時間（CPU秒 / 5秒）
-              </text>
-              <g font-size="20" fill="#2d9d5c" text-anchor="middle">
-                <text x="350" y="123">0</text>
-                <text x="510" y="123">2</text>
-                <text x="670" y="123">4</text>
-                <text x="830" y="123">6</text>
-              </g>
-              <g stroke="#174029" stroke-opacity="0.2" stroke-width="2">
-                <line x1="350" y1="132" x2="350" y2="222" />
-                <line x1="510" y1="132" x2="510" y2="222" />
-                <line x1="670" y1="132" x2="670" y2="222" />
-                <line x1="830" y1="132" x2="830" y2="222" />
-              </g>
-              <text x="70" y="164" font-size="22">通常表示</text>
-              <text x="70" y="204" font-size="22">Liquid Glass</text>
-              <rect x="350" y="145" width="181.2" height="24" rx="4" fill="#2d9d5c" />
-              <rect x="350" y="185" width="526.1" height="24" rx="4" fill="#ff1493" />
-              <text x="544" y="165" font-size="22" font-weight="700">2.265 CPU秒</text>
-              <text x="889" y="205" font-size="22" font-weight="700">6.576 CPU秒</text>
-
-              <text x="60" y="270" font-size="25" font-weight="700">
-                アプリのGPU活動時間（秒 / 5秒）
-              </text>
-              <g font-size="20" fill="#2d9d5c" text-anchor="middle">
-                <text x="350" y="302">0</text>
-                <text x="550" y="302">1</text>
-                <text x="750" y="302">2</text>
-                <text x="950" y="302">3</text>
-              </g>
-              <g stroke="#174029" stroke-opacity="0.2" stroke-width="2">
-                <line x1="350" y1="311" x2="350" y2="401" />
-                <line x1="550" y1="311" x2="550" y2="401" />
-                <line x1="750" y1="311" x2="750" y2="401" />
-                <line x1="950" y1="311" x2="950" y2="401" />
-              </g>
-              <text x="70" y="343" font-size="22">通常表示</text>
-              <text x="70" y="383" font-size="22">Liquid Glass</text>
-              <rect x="350" y="324" width="338.2" height="24" rx="4" fill="#2d9d5c" />
-              <rect x="350" y="364" width="513.4" height="24" rx="4" fill="#ff1493" />
-              <text x="701" y="344" font-size="22" font-weight="700">1.691秒</text>
-              <text x="876" y="384" font-size="22" font-weight="700">2.567秒</text>
-
-              <text x="60" y="444" font-size="19" fill="#2d9d5c">
-                CPU時間は複数スレッドの実行時間の合計。GPU活動時間とは単位・集計方法が異なる。
-              </text>
-              <text x="60" y="475" font-size="19" fill="#2d9d5c">
-                比較区間: アプリ起動後 +18〜+23秒。活動の増加は電力差の原因を単独で証明しない。
-              </text>
-            </g>
-          </svg>
+          <img
+            class="chart-svg"
+            src="./assets/261026/activity-chart.svg"
+            alt="CPUとGPUの活動時間の比較グラフ"
+          />
           <aside class="notes">
             <p>電力差が大きかった最後の5秒について、アプリのCPUとGPUの活動を比べます。</p>
             <p>
@@ -361,33 +302,9 @@
           </aside>
         </section>
 
-        <!-- <section>
-          <h2>大きく変わっているのが</h2>
-          <ul>
-            <li>アプリのCPU実行時間が増加</li>
-            <li>GPUの活動時間も増加</li>
-            <li>Rasterの平均描画時間: 3.69 ms から 6.02 ms</li>
-            <li><code>Canvas::saveLayer</code>: 11回から3,050回</li>
-          </ul>
-          <aside class="notes">
-            <p>最後の5秒では、アプリのCPU実行時間が大きく増えていました。</p>
-            <p>GPUの活動時間も増えています。</p>
-            <p>FlutterのRaster描画は、平均で3.69ミリ秒から6.02ミリ秒になりました。</p>
-            <p>また、記録されたCanvasのsaveLayer開始回数は11回から3,050回でした。</p>
-            <p>
-              これらは描画の仕事が増えた可能性を示す手がかりです。ただし、saveLayerの回数だけで原因やコストは決まりません。
-            </p>
-            <p>この手がかりから、次はLiquid Glassの描画の仕組みを見ます。</p>
-            <p class="furigana">
-              ふりがな:
-              最後=さいご、秒=びょう、実行時間=じっこうじかん、大=おお、増=ふ、活動時間=かつどうじかん、描画=びょうが、平均=へいきん、記録=きろく、開始回数=かいしかいすう、回=かい、仕事=しごと、可能性=かのうせい、示=しめ、手=て、回数=かいすう、原因=げんいん、決=き、次=つぎ、仕組=しく、見=み
-            </p>
-          </aside>
-        </section> -->
-
         <section>
           <h2>テスト結果まとめ</h2>
-          <table>
+          <table style="font-size: xx-large">
             <thead>
               <tr>
                 <th>指標</th>
@@ -428,8 +345,8 @@
               </tr>
             </tbody>
           </table>
-          <p>最後の5秒: エネルギー差 +7.05 J（20秒間の純増分の約95%）</p>
-          <p>充電中の電力レール測定。アプリ単体の消費電力ではありません。</p>
+          <!-- <p>最後の5秒: エネルギー差 +7.05 J（20秒間の純増分の約95%）</p>
+          <p>充電中の電力レール測定。アプリ単体の消費電力ではありません。</p> -->
           <!-- <p>
             充電中の電力レール測定。アプリ単体の消費電力ではなく、原因も未確定。
           </p> -->
@@ -456,7 +373,7 @@
         </section>
 
         <section>
-          <p>皆さんに質問</p>
+          <h2>皆さんに質問</h2>
           <ul>
             <li>サクサク動くには何が必要なのか</li>
             <li>サクサク動くだけで良いのか</li>
@@ -474,248 +391,43 @@
           </aside>
         </section>
 
-        <!-- <section>
-          <h2>差の多くは、最後の5秒に出た</h2>
-          <ul>
-            <li>20秒全体の増加分: 約7.41 J</li>
-            <li>最後の5秒の増加分: 約7.05 J</li>
-            <li>この5秒の平均レール電力: 2.767 W 対 1.357 W</li>
-            <li>途中の10秒では、Liquid Glass側が低い</li>
-          </ul>
-          <aside class="notes">
-            <p>20秒全体では、差は約7.41ジュールでした。</p>
-            <p>そのうち約95パーセントは、最後の5秒に集まっていました。</p>
-            <p>この5秒の平均は、Liquid Glass側が2.767ワット、通常表示が1.357ワットです。</p>
-            <p>一方で、途中の10秒はLiquid Glass側の測定値が低くなっています。</p>
-            <p>
-              つまり、いつでも同じだけ増えるわけではありません。次は、最後の5秒で何が動いていたかを見ます。
-            </p>
-            <p class="furigana">
-              ふりがな:
-              秒=びょう、全体=ぜんたい、差=さ、約=やく、最後=さいご、集=あつ、平均=へいきん、側=がわ、通常表示=つうじょうひょうじ、一方=いっぽう、途中=とちゅう、測定値=そくていち、低=ひく、同=おな、増=ふ、次=つぎ、何=なに、動=うご、見=み
-            </p>
-          </aside>
-        </section> -->
-
-        <!-- <section>
-          <h2>測定から言えること、言えないこと</h2>
-          <ul>
-            <li>言えること: この記録ではCPU・GPU・描画の仕事が増えた</li>
-            <li>考えられること: 複雑な描画が差に関係した可能性がある</li>
-            <li>まだ言えないこと: BackdropFilterだけが原因だ</li>
-            <li>特定のshaderが電力を増やした、という証拠もない</li>
-          </ul>
-          <aside class="notes">
-            <p>ここで、測定結果と原因の説明を分けます。</p>
-            <p>記録からは、CPU、GPU、描画の仕事が増えたことを確認できます。</p>
-            <p>複雑な描画が関係した可能性はあります。</p>
-            <p>しかし、この記録だけでは、BackdropFilterだけが原因だとは言えません。</p>
-            <p>どのwidgetやshaderが差を作ったのかも、まだ分かっていません。</p>
-            <p>では、BackdropFilterはどんな仕事をするのでしょうか。</p>
-            <p class="furigana">
-              ふりがな:
-              測定結果=そくていけっか、原因=げんいん、説明=せつめい、分=わ、記録=きろく、描画=びょうが、仕事=しごと、増=ふ、確認=かくにん、複雑=ふくざつ、関係=かんけい、可能性=かのうせい、言=い、差=さ、作=つく
-            </p>
-          </aside>
-        </section> -->
-
         <section>
           <h2>エネルギーの基本</h2>
           <ul>
             <li>CPU: アプリの処理や画面の準備</li>
             <li>GPU: 画像の合成や効果の計算</li>
-            <li>使用が長く続くほど、使うエネルギーも増えやすい</li>
+            <li>処理や描画が続くと、使うエネルギーも増えることがある</li>
             <li>画面が滑らかかどうかだけでは、使用の量は分からない</li>
           </ul>
           <aside class="notes">
-            <p>まず大まかな仕組みを確認します。</p>
-            <p>CPUは、アプリの処理や画面を描くための準備をします。</p>
-            <p>GPUは、画像を合成したり、ぼかしなどの効果を計算したりします。</p>
-            <p>CPUやGPUが長く働けば、端末が使うエネルギーも増えることがあります。</p>
-            <p>ただし、処理の量だけで消費電力が正確に決まるわけではありません。</p>
+            <p>まず、CPUやGPUの動きと、電気の使い方を簡単に見てみます。</p>
+            <p>
+              CPUやGPUの中には、たくさんの小さな電子スイッチがあります。計算するときは、このスイッチを切り替えます。計算が増えたり、速く動かしたりすると、電気を多く使うことがあります。
+            </p>
+            <p>
+              画面が変わらず、することがなければ、CPUは休んで電気を節約できます。ところが、必要のない処理や画面の描き直しが何度も続くと、CPUは休みにくくなります。GPUも、画面を描き直すたびに働きます。
+            </p>
+            <p>
+              実際に電気をどれくらい使うかは、電流を測る機器で調べられます。OSのプロファイラを使うと、CPUやGPUの動きや、エネルギーの変化も確認できます。比べるときは、同じ端末で同じ操作をすることが大切です。
+            </p>
+            <p>
+              ただし、CPUやGPUの動きと電気の使用量が一緒に増えても、それだけで原因が分かったとは言えません。今日は、測定結果を手がかりに考えていきます。
+            </p>
             <p>この考え方を、BackdropFilterの一つの例に当てはめます。</p>
             <p class="furigana">
               ふりがな:
-              大=おお、仕組=しく、確認=かくにん、処理=しょり、画面=がめん、描=えが、準備=じゅんび、画像=がぞう、合成=ごうせい、効果=こうか、計算=けいさん、長=なが、働=はたら、端末=たんまつ、使=つか、増=ふ、量=りょう、消費電力=しょうひでんりょく、正確=せいかく、決=き、考=かんが、方=かた、一=ひと、例=れい、当=あ
+              動き=うご、電気=でんき、使い方=つかかた、簡単=かんたん、中=なか、小さい=ちい、電子=でんし、計算=けいさん、切り替える=きりか、増える=ふ、速い=はや、画面=がめん、変わる=か、休む=やす、節約=せつやく、必要=ひつよう、描き直し=えがきなお、何度=なんど、働く=はたら、実際=じっさい、使用量=しようりょう、電流=でんりゅう、測る=はか、機器=きき、調べる=しら、動き=うご、変化=へんか、確認=かくにん、比べる=くら、同じ=おな、端末=たんまつ、操作=そうさ、大切=たいせつ、一緒=いっしょ、原因=げんいん、手がかり=てがかり、考える=かんが、例=れい、当てはめる=あ
             </p>
           </aside>
         </section>
 
         <section>
           <h2>BackdropFilterの裏側</h2>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="100%"
-            height="auto"
-            viewBox="0 0 1200 570"
-            role="img"
-            aria-labelledby="backdrop-sequence-title backdrop-sequence-description"
-            preserveAspectRatio="xMidYMid meet"
-          >
-            <title id="backdrop-sequence-title">FlutterのBackdropFilter描画シーケンス</title>
-            <desc id="backdrop-sequence-description">
-              背景を先に描画し、BackdropFilterの設定からRenderObject、Layer
-              treeへ処理を渡す。RasterizerはClipRectなどで制限された範囲の既描画ピクセルに画像フィルターを適用し、結果を合成してからBackdropFilterの子を前景として描画し、完成したフレームを表示する。
-            </desc>
-            <defs>
-              <marker
-                id="backdrop-arrow"
-                markerWidth="10"
-                markerHeight="10"
-                refX="8"
-                refY="5"
-                orient="auto"
-                markerUnits="strokeWidth"
-              >
-                <path d="M 0 0 L 10 5 L 0 10 z" fill="#174029" />
-              </marker>
-              <marker
-                id="backdrop-arrow-pink"
-                markerWidth="10"
-                markerHeight="10"
-                refX="8"
-                refY="5"
-                orient="auto"
-                markerUnits="strokeWidth"
-              >
-                <path d="M 0 0 L 10 5 L 0 10 z" fill="#d10b70" />
-              </marker>
-            </defs>
-            <g font-family="sans-serif" fill="#174029">
-              <g font-size="20" font-weight="700" text-anchor="middle">
-                <rect x="30" y="22" width="180" height="46" rx="6" fill="#e8f3e9" />
-                <text x="120" y="51">Widget tree</text>
-                <rect x="250" y="22" width="180" height="46" rx="6" fill="#e8f3e9" />
-                <text x="340" y="51">RenderObject</text>
-                <rect x="470" y="22" width="180" height="46" rx="6" fill="#e8f3e9" />
-                <text x="560" y="51">Layer tree</text>
-                <rect x="700" y="22" width="180" height="46" rx="6" fill="#e8f3e9" />
-                <text x="790" y="51">Rasterizer</text>
-                <rect x="970" y="22" width="180" height="46" rx="6" fill="#e8f3e9" />
-                <text x="1060" y="51">Display</text>
-              </g>
-
-              <g stroke="#174029" stroke-opacity="0.28" stroke-width="2" stroke-dasharray="6 7">
-                <line x1="120" y1="68" x2="120" y2="470" />
-                <line x1="340" y1="68" x2="340" y2="470" />
-                <line x1="560" y1="68" x2="560" y2="470" />
-                <line x1="790" y1="68" x2="790" y2="470" />
-                <line x1="1060" y1="68" x2="1060" y2="470" />
-              </g>
-
-              <g font-size="18" text-anchor="middle">
-                <text x="230" y="97">1. 先に描画された背景</text>
-                <text x="230" y="119" font-size="15">背後のwidgetがシーンに入る</text>
-                <line
-                  x1="120"
-                  y1="132"
-                  x2="560"
-                  y2="132"
-                  stroke="#174029"
-                  stroke-width="2"
-                  marker-end="url(#backdrop-arrow)"
-                />
-
-                <text x="230" y="157">2. ImageFilter.blur を設定</text>
-                <line
-                  x1="120"
-                  y1="170"
-                  x2="340"
-                  y2="170"
-                  stroke="#174029"
-                  stroke-width="2"
-                  marker-end="url(#backdrop-arrow)"
-                />
-
-                <text x="450" y="195">3. BackdropFilterLayer を追加</text>
-                <line
-                  x1="340"
-                  y1="208"
-                  x2="560"
-                  y2="208"
-                  stroke="#174029"
-                  stroke-width="2"
-                  marker-end="url(#backdrop-arrow)"
-                />
-
-                <text x="675" y="233">4. 描画命令をRasterへ</text>
-                <line
-                  x1="560"
-                  y1="246"
-                  x2="790"
-                  y2="246"
-                  stroke="#174029"
-                  stroke-width="2"
-                  marker-end="url(#backdrop-arrow)"
-                />
-              </g>
-
-              <rect
-                x="665"
-                y="263"
-                width="250"
-                height="54"
-                rx="6"
-                fill="#fff0f7"
-                stroke="#d10b70"
-                stroke-width="2"
-              />
-              <text x="790" y="286" font-size="17" font-weight="700" text-anchor="middle">
-                5. Clip内の既描画ピクセルを読む
-              </text>
-              <text x="790" y="307" font-size="16" text-anchor="middle">ImageFilterでぼかす</text>
-
-              <rect
-                x="665"
-                y="328"
-                width="250"
-                height="62"
-                rx="6"
-                fill="#fff0f7"
-                stroke="#d10b70"
-                stroke-width="2"
-              />
-              <text x="790" y="353" font-size="17" font-weight="700" text-anchor="middle">
-                6. フィルター結果を合成
-              </text>
-              <text x="790" y="377" font-size="16" text-anchor="middle">その上にchildを描く</text>
-              <line
-                x1="790"
-                y1="317"
-                x2="790"
-                y2="328"
-                stroke="#d10b70"
-                stroke-width="2"
-                marker-end="url(#backdrop-arrow-pink)"
-              />
-
-              <g font-size="18" text-anchor="middle">
-                <text x="925" y="414">7. 完成フレームを表示</text>
-                <line
-                  x1="790"
-                  y1="427"
-                  x2="1060"
-                  y2="427"
-                  stroke="#174029"
-                  stroke-width="2"
-                  marker-end="url(#backdrop-arrow)"
-                />
-              </g>
-
-              <rect x="35" y="451" width="1130" height="47" rx="6" fill="#e8f3e9" />
-              <text x="55" y="480" font-size="18" font-weight="700">ClipRectなど</text>
-              <text x="205" y="480" font-size="18">
-                フィルター範囲を制限。childの大きさだけで背景の処理範囲が決まるわけではない。
-              </text>
-
-              <text x="55" y="526" font-size="17" fill="#d10b70">
-                背景が変わると、次の描画でこの範囲のフィルター結果も更新されることがある。
-              </text>
-              <text x="55" y="552" font-size="16" fill="#174029">
-                Clipがない場合、フィルター範囲が画面全体に広がることがある。範囲と更新頻度が負荷に関係する。
-              </text>
-            </g>
-          </svg>
+          <img
+            class="chart-svg"
+            src="./assets/261026/backdrop-filter-diagram.svg"
+            alt="BackdropFilterの描画シーケンス図"
+          />
           <aside class="notes">
             <p>まず、BackdropFilterより後ろにあるwidgetが先に描画されます。</p>
             <p>BackdropFilterはImageFilterをRenderObjectとLayer treeに渡します。</p>
@@ -744,13 +456,13 @@
           <table width="100%">
             <tbody>
               <tr>
-                <td width="30%">
+                <!-- <td width="30%">
                   <img
                     width="100%"
                     src="./assets/261026/Screenshot 2026-10-20 at 0.01.27.png"
                     alt="BackdropFilterの描画負荷を減らす方法を説明した資料"
                   />
-                </td>
+                </td> -->
                 <td valign="top">
                   <ul>
                     <li>背景をコピーし、ぼかして重ねる</li>
@@ -784,7 +496,7 @@
         </section>
 
         <section>
-          <h2>これで自分のアプリもプロファイルしたい気分になったのでしょうか</h2>
+          <h1>これで自分のアプリも<br />プロファイルしたい気分に<br />なったのでしょうか</h1>
 
           <aside class="notes">
             <p>これで自分のアプリもプロファイルしたい気分になったのでしょうか</p>
@@ -793,7 +505,7 @@
         </section>
 
         <section>
-          <h2>Android Performance Analyzer</h2>
+          <p>Android Performance Analyzer</p>
 
           <img src="./assets/261026/Screenshot 2026-10-18 at 13.56.15.png" alt="" />
 
@@ -808,9 +520,13 @@
         </section>
 
         <section>
-          <h2>Xcode Instruments・Energy Log</h2>
+          <p>Xcode Instruments・Energy Log</p>
 
-          <img src="./assets/261026/Screenshot 2026-10-20 at 0.13.03.png" alt="" />
+          <img
+            style="height: 70vh; max-height: 70vh; object-fit: contain"
+            src="./assets/261026/Screenshot 2026-10-20 at 0.13.03.png"
+            alt=""
+          />
 
           <aside class="notes">
             <p>iOSでは、Xcode InstrumentsのEnergy Logを使います。</p>
@@ -824,15 +540,14 @@
           </aside>
         </section>
 
-        <section>
-          <h2>Macrobenchmarkを書く</h2>
+        <section class="macrobenchmark-slide">
+          <p>Macrobenchmarkを書く</p>
           <table width="100%">
             <tbody>
               <tr>
-                <td width="62%" valign="top">
+                <td width="60%" style="vertical-align: middle">
                   <pre><code class="language-kotlin">@get:Rule
 val benchmarkRule = MacrobenchmarkRule()
-
 @Test
 fun scrollHome() = benchmarkRule.measureRepeated(
     packageName = "com.example.app",
@@ -844,7 +559,7 @@ fun scrollHome() = benchmarkRule.measureRepeated(
         .fling(Direction.DOWN)
 }</code></pre>
                 </td>
-                <td width="38%" valign="top">
+                <td width="48%" style="vertical-align: middle">
                   <ul>
                     <li>専用のテストモジュールに書く</li>
                     <li>UI Automatorでユーザー操作を再現する</li>
@@ -858,7 +573,7 @@ fun scrollHome() = benchmarkRule.measureRepeated(
           <p>各反復の結果: 指標のJSON + system trace（.perfetto-trace）</p>
           <p>
             <a href="https://developer.android.com/studio/profile/macrobenchmark?hl=ja"
-              >Macrobenchmarkの作成ガイド</a
+              >参考：Macrobenchmarkの作成ガイド</a
             >
           </p>
           <aside class="notes">
@@ -892,7 +607,7 @@ fun scrollHome() = benchmarkRule.measureRepeated(
           <p>
             <a
               href="https://developer.android.com/android-performance-analyzer/analyze/ai#ai-analysis"
-              >AIによるtrace分析ガイド</a
+              >参考：AIによるtrace分析ガイド</a
             >
           </p>
           <aside class="notes">
@@ -947,9 +662,48 @@ fun scrollHome() = benchmarkRule.measureRepeated(
       </div>
     </div>
 
+    <div class="intro-scatter" aria-hidden="true" hidden>
+      <img src="./assets/261026/1756189026278.jpg" alt="" />
+      <img src="./assets/261026/imli.jpeg" alt="" />
+      <img src="./assets/261026/21999998.jpeg" alt="" />
+      <img src="./assets/261026/icon.png" alt="" />
+      <!-- <img src="./assets/261026/1756189026278.jpg" alt="" />
+      <img src="./assets/261026/imli.jpeg" alt="" />
+      <img src="./assets/261026/21999998.jpeg" alt="" />
+      <img src="./assets/261026/icon.png" alt="" /> -->
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/dist/reveal.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/plugin/notes/notes.js"></script>
     <script>
+      const scatterSlots = [
+        [18, 20],
+        [82, 20],
+        [18, 80],
+        [82, 80],
+      ]
+      for (let index = scatterSlots.length - 1; index > 0; index -= 1) {
+        const swapIndex = Math.floor(Math.random() * (index + 1))
+        const slot = scatterSlots[index]
+        scatterSlots[index] = scatterSlots[swapIndex]
+        scatterSlots[swapIndex] = slot
+      }
+
+      const scatter = document.querySelector(".intro-scatter")
+      scatter.querySelectorAll("img").forEach((image, index) => {
+        const [left, top] = scatterSlots[index]
+        image.style.left = `${left + (Math.random() * 8 - 4)}%`
+        image.style.top = `${top + (Math.random() * 8 - 4)}%`
+        image.style.setProperty("--rotation", `${Math.random() * 30 - 15}deg`)
+      })
+
+      const updateScatterVisibility = (event) => {
+        const currentSlide = event?.currentSlide ?? Reveal.getCurrentSlide()
+        scatter.hidden = !currentSlide?.classList.contains("intro-slide")
+      }
+      Reveal.on("ready", updateScatterVisibility)
+      Reveal.on("slidechanged", updateScatterVisibility)
+
       Reveal.initialize({
         hash: true,
         slideNumber: "c/t",
