@@ -43,6 +43,10 @@
         font-family: "Kosugi Maru", sans-serif;
       }
 
+      .reveal p {
+        font-size: xx-large;
+      }
+
       .reveal mark,
       .reveal .important {
         background: var(--highlight);
@@ -72,7 +76,7 @@
       .reveal h2 {
         font-size: x-large;
         text-align: left;
-        padding: 0 0 4rem 2rem;
+        padding: 0 0 1rem 2rem;
       }
 
       .reveal h3 {
@@ -120,6 +124,10 @@
         /* text-decoration-style: wavy; */
         /* text-underline-offset: 0.12em; */
       }
+
+      code {
+        color: var(--highlight);
+      }
     </style>
   </head>
   <body>
@@ -164,150 +172,87 @@
         </section>
 
         <section>
-          <h2>今日話したいことはこの三つに分けて話しようと思います</h2>
-        </section>
+          <h2>画面の滑らかさの裏側<br />DevToolsから考えるFlutterアプリのバッテリー消費と最適化</h2>
 
-        <section>
-          <h1>画面の滑らかさの裏側<br />DevToolsから考えるFlutterアプリのバッテリー消費と最適化</h1>
+          <ul>
+            <li>なぜエネルギー消費計測が大事なのか</li>
+            <li>FlutterのWidgetとエネルギー消費の関係は何なのか</li>
+            <li>アプリのエネルギー使用をどうやって測るのか</li>
+          </ul>
 
-          <!-- <ul>
-            <li>滑らかな画面なら、電池にもやさしいでしょうか</li>
-            <li>画面が動いていない時、アプリは止まれているでしょうか</li>
-            <li>見た目の効果に、どれくらいの仕事が必要でしょうか</li>
-          </ul> -->
           <aside class="notes">
             <p>さっそくですが、今日のテーマに入りたいと思います</p>
             <p>この話に答えるには一つの例が必要なので、</p>
-            <!-- <p>タイトルが長いので、ちょっと切り出してみました</p> -->
-
-            <!-- <p>画面が滑らかに動くことは、とても大切です。</p>
-            <p>
-              ただし、滑らかさだけでは、電池の使い方は分かりません。
-            </p>
-            <p>
-              画面を見ていない時に処理が続いていないかも大切です。
-            </p>
-            <p>
-              今日は、Liquid Glassの測定結果を使って、この問いを具体的に考えます。
-            </p> -->
-            <p class="furigana">
-              ふりがな:
-              今日=きょう、テーマ=てーま、入る=はいる、話=はなし、答える=こたえる、一つ=ひとつ、例=れい、必要=ひつよう
-            </p>
           </aside>
         </section>
 
         <section>
+          <h1>Section１：なぜエネルギー消費計測が大事なのか</h1>
+          <h2>ぼかし（FlutterでLiquid Glass実装）を一つの例でみていきましょう</h2>
+        </section>
+
+        <!-- <section>
+
+
           <img
-            style="height: 80vh; max-height: 80vh; object-fit: contain"
+            style="height: 50vh; max-height: 50vh; object-fit: contain"
             src="./assets/261026/hero_row2.webp"
             alt=""
           />
 
-          <aside class="notes">
-            <p>LGを一つの例としてみていきましょう</p>
-            <p>知らない方いないと思いますが、、</p>
-            <p>Liquid Glassは、ガラスのように背景が透けて見えるUI表現です。</p>
-            <p>Flutterでは、背景をぼかし、半透明の色を重ねて、この見た目を作れます。</p>
-            <p>背景が動くと、ぼかしの結果も更新する必要があります。</p>
-            <p>
-              ここからは、この表現を作る処理が、端末のエネルギーにどう関係するかを見ていきます。
-            </p>
-            <p class="furigana">
-              ふりがな:
-              背景=はいけい、透=す、見=み、表現=ひょうげん、半透明=はんとうめい、色=いろ、重=かさ、目=め、作=つく、動=うご、結果=けっか、更新=こうしん、必要=ひつよう、処理=しょり、端末=たんまつ、関係=かんけい
-            </p>
-          </aside>
-        </section>
+          <aside class="notes"></aside>
+        </section> -->
 
         <section class="energy-slide">
-          <p>Flutter 🤝 Liquid Glass → エネルギー？</p>
-          <h1>エネルギーパーフォマンスはどうでしょう</h1>
+          <h2>
+            なぜエネルギー消費計測が大事なのか<br />ぼかし（FlutterでLiquid
+            Glass実装）を一つの例として
+          </h2>
 
-          <aside class="notes">
-            <p>エネルギーの話なので、テストの結果を持ってきました。</p>
-            <p class="furigana">ふりがな: 話=はなし、結果=けっか、持つ=もつ</p>
-          </aside>
+          <!-- <p>liquid_glass_widgets</p> -->
+
+          <img src="./assets/261026/Screenshot 2026-10-21 at 14.52.09.png" alt="" />
+
+          <aside class="notes"></aside>
         </section>
 
         <section>
-          <h2>測定結果</h2>
+          <h2>計測結果：エネルギーの基本</h2>
+
           <ul>
-            <li>同じHome画面の20秒を比較</li>
-            <li>Liquid Glass: 33.19 J</li>
-            <li>通常表示: 25.79 J</li>
-            <li>測定した電力レールのエネルギーは28.7%増加</li>
+            <li>CPU/GPUを使うほどエネルギー消費になる</li>
+            <li>特に画面が何も動いていない時が大事</li>
           </ul>
-          <aside class="notes">
-            <p>
-              結論からお伝えします。同じHome画面を20秒ずつ測定したところ、Liquid
-              Glass側は33.19ジュール、通常表示は25.79ジュールでした。
-            </p>
-            <p>
-              測定した電力レールの合計では、Liquid
-              Glass側が7.41ジュール、28.7パーセント高い結果です。
-            </p>
-            <p>
-              ただし、この記録は端末を充電しながら取っています。アプリ単体の消費電力や、電池寿命が28.7パーセント短くなることを示す数字ではありません。
-            </p>
-            <p>
-              さらに、差の約95パーセントは最後の5秒に集中していました。では、その時、アプリでは何が起きていたのでしょうか。
-            </p>
-            <p>
-              ふりがな:
-              結論=けつろん、伝える=つたえる、同じ=おなじ、画面=がめん、測定=そくてい、通常表示=つうじょうひょうじ、合計=ごうけい、高い=たかい、結果=けっか、端末=たんまつ、充電=じゅうでん、記録=きろく、取る=とる、単体=たんたい、消費電力=しょうひでんりょく、電池寿命=でんちじゅみょう、短い=みじかい、示す=しめす、数字=すうじ、差=さ、最後=さいご、秒=びょう、集中=しゅうちゅう、時=とき、何=なに、起きる=おきる
-            </p>
-          </aside>
+
+          <img src="./assets/261026/Screenshot 2026-10-21 at 14.59.20.png" alt="" />
+
+          <a href="https://docs.flutter.dev/perf/metrics" target="_blank"
+            >Flutter: Performance metrics</a
+          >
         </section>
 
         <section>
-          <h2>エネルギー消費</h2>
+          <h2>計測結果：ぼかし（FlutterでLiquid Glass実装）・エネルギー</h2>
+
+          <h1>ぼかし中はエネルギー利用が28%増加</h1>
+
           <img class="chart-svg" src="./assets/261026/power-chart.svg" alt="平均電力の比較グラフ" />
-          <aside class="notes">
-            <p>20秒の平均だけでは見えにくいので、5秒ずつに分けました。</p>
-            <p>途中の10秒では、Liquid Glass側の測定値が低くなっています。</p>
-            <p>
-              一方、最後の5秒では平均電力が2.767ワット対1.357ワットで、その5秒だけで約7.05ジュールの差が出ました。
-            </p>
-            <p>
-              これは測定した電力レールの差です。充電中の記録なので、アプリ単体の消費電力や電池寿命を示す数字ではありません。
-            </p>
-            <p class="furigana">
-              ふりがな:
-              秒=びょう、分=わ、途中=とちゅう、側=がわ、測定値=そくていち、低=ひく、一方=いっぽう、最後=さいご、平均電力=へいきんでんりょく、差=さ、測定=そくてい、電力=でんりょく、記録=きろく、端末=たんまつ、充電中=じゅうでんちゅう、単体=たんたい、消費電力=しょうひでんりょく、電池寿命=でんちじゅみょう、数字=すうじ、示=しめ
-            </p>
-          </aside>
+
+          <aside class="notes"></aside>
         </section>
 
         <section>
-          <h2>CPUとGPUの活動時間</h2>
+          <h2>計測結果：ぼかし（FlutterでLiquid Glass実装）・CPU/GPU</h2>
           <img
             class="chart-svg"
             src="./assets/261026/activity-chart.svg"
             alt="CPUとGPUの活動時間の比較グラフ"
           />
-          <aside class="notes">
-            <p>電力差が大きかった最後の5秒について、アプリのCPUとGPUの活動を比べます。</p>
-            <p>
-              CPU実行時間は2.265 CPU秒から6.576
-              CPU秒に増えました。複数スレッドの実行時間を合計するため、5秒を超えることがあります。
-            </p>
-            <p>
-              GPU活動時間は1.691秒から2.567秒に増えています。CPUとGPUでは集計方法が異なるため、二つの数値を直接比べるものではありません。
-            </p>
-            <p>
-              これらは同じ時間帯に観測された変化です。Liquid
-              Glassだけが原因だと証明するものではありません。
-            </p>
-            <p class="furigana">
-              ふりがな:
-              電力差=でんりょくさ、大=おお、最後=さいご、秒=びょう、活動=かつどう、比=くら、実行時間=じっこうじかん、増=ふ、複数=ふくすう、合計=ごうけい、超=こ、集計方法=しゅうけいほうほう、異=こと、直接=ちょくせつ、数値=すうち、観測=かんそく、変化=へんか、原因=げんいん、証明=しょうめい
-            </p>
-          </aside>
+          <aside class="notes"></aside>
         </section>
 
         <section>
-          <h2>テスト結果まとめ</h2>
+          <h2>計測結果：まとめ</h2>
           <table style="font-size: xx-large">
             <thead>
               <tr>
@@ -349,33 +294,8 @@
               </tr>
             </tbody>
           </table>
-          <!-- <p>最後の5秒: エネルギー差 +7.05 J（20秒間の純増分の約95%）</p>
-          <p>充電中の電力レール測定。アプリ単体の消費電力ではありません。</p> -->
-          <!-- <p>
-            充電中の電力レール測定。アプリ単体の消費電力ではなく、原因も未確定。
-          </p> -->
-          <aside class="notes">
-            <p>今回のテスト結果をまとめます。</p>
-            <p>
-              Pixel 9で同じHome画面を20秒ずつ比較し、測定した電力レールの合計はLiquid
-              Glass側が33.19ジュール、通常表示が25.79ジュールでした。
-            </p>
-            <p>
-              増加分の約95パーセントは最後の5秒に集中し、その時間帯にはアプリのCPUとGPU活動、FlutterのRaster描画時間も増えていました。
-            </p>
-            <p>
-              したがって、この記録では描画の仕事が増えた時間帯と電力レールの差が重なっています。ただし、二つの記録だけで原因を特定することはできません。
-            </p>
-            <p>
-              さらに両方とも充電中です。アプリ単体の消費電力や、電池寿命への影響として解釈しないようにします。
-            </p>
-            <p class="furigana">
-              ふりがな:
-              今回=こんかい、結果=けっか、同=おな、画面=がめん、起動=きどう、後=ご、秒=びょう、比較=ひかく、測定=そくてい、電力=でんりょく、合計=ごうけい、側=がわ、通常表示=つうじょうひょうじ、増加分=ぞうかぶん、最後=さいご、集中=しゅうちゅう、時間帯=じかんたい、活動=かつどう、描画=びょうが、重=かさ、原因=げんいん、特定=とくてい、充電中=じゅうでんちゅう、単体=たんたい、消費電力=しょうひでんりょく、電池寿命=でんちじゅみょう、影響=えいきょう、解釈=かいしゃく
-            </p>
-          </aside>
         </section>
-
+        <!-- 
         <section>
           <h2>皆さんに質問</h2>
           <ul>
@@ -383,19 +303,9 @@
             <li>サクサク動くだけで良いのか</li>
             <li>開発者はエネルギー消費の理解は必要なのか</li>
           </ul>
+        </section> -->
 
-          <aside class="notes">
-            <p>サクサク動くには何が必要なのか</p>
-            <p>サクサク動くだけで良いのか</p>
-            <p>開発者はエネルギー消費の理解は必要なのか</p>
-            <p class="furigana">
-              ふりがな:
-              皆さん=みなさん、質問=しつもん、動く=うごく、何=なに、必要=ひつよう、良い=よい、開発者=かいはつしゃ、消費=しょうひ、理解=りかい
-            </p>
-          </aside>
-        </section>
-
-        <section>
+        <!-- <section>
           <h2>エネルギーの基本</h2>
           <ul>
             <li>CPU: アプリの処理や画面の準備</li>
@@ -423,107 +333,103 @@
               動き=うご、電気=でんき、使い方=つかかた、簡単=かんたん、中=なか、小さい=ちい、電子=でんし、計算=けいさん、切り替える=きりか、増える=ふ、速い=はや、画面=がめん、変わる=か、休む=やす、節約=せつやく、必要=ひつよう、描き直し=えがきなお、何度=なんど、働く=はたら、実際=じっさい、使用量=しようりょう、電流=でんりゅう、測る=はか、機器=きき、調べる=しら、動き=うご、変化=へんか、確認=かくにん、比べる=くら、同じ=おな、端末=たんまつ、操作=そうさ、大切=たいせつ、一緒=いっしょ、原因=げんいん、手がかり=てがかり、考える=かんが、例=れい、当てはめる=あ
             </p>
           </aside>
+        </section> -->
+
+        <section>
+          <h1>Section２：FlutterのWidgetとエネルギー消費の関係は何なのか</h1>
+          <h2>ぼかしを実現するときに使うBackdropFilterの裏側</h2>
         </section>
 
         <section>
-          <h2>BackdropFilterの裏側</h2>
+          <!-- <h2>Widgetの裏側：BackdropFilter</h2> -->
+
           <img
-            class="chart-svg"
-            src="./assets/261026/backdrop-filter-diagram.svg"
+            style="width: 100%; height: 95vh; max-height: 100vh"
+            src="./assets/261026/mermaid-diagram-2026-10-21-142824.svg"
             alt="BackdropFilterの描画シーケンス図"
           />
-          <aside class="notes">
-            <p>まず、BackdropFilterより後ろにあるwidgetが先に描画されます。</p>
-            <p>BackdropFilterはImageFilterをRenderObjectとLayer treeに渡します。</p>
-            <p>
-              RasterizerはClipRectなどで制限された範囲の、すでに描かれた背景を使ってフィルター結果を作ります。
-            </p>
-            <p>
-              その結果をblendModeに従って合成し、最後にBackdropFilterのchildを前景として描画します。
-            </p>
-            <p>
-              childの範囲と、フィルターが読む背景の範囲は同じとは限りません。範囲を制限するClipが重要です。
-            </p>
-            <p>
-              背景が変わればフィルター結果の更新が必要になることがあり、範囲や更新頻度が描画負荷に影響します。
-            </p>
-            <p>では、この仕事を実機の記録でどう確認するかを見ていきます。</p>
-            <p class="furigana">
-              ふりがな:
-              後=うし、先=さき、描画=びょうが、渡=わた、範囲=はんい、制限=せいげん、背景=はいけい、使=つか、結果=けっか、作=つく、従=したが、合成=ごうせい、最後=さいご、前景=ぜんけい、同=おな、重要=じゅうよう、変=か、更新=こうしん、必要=ひつよう、更新頻度=こうしんひんど、負荷=ふか、影響=えいきょう、実機=じっき、記録=きろく、確認=かくにん
-            </p>
-          </aside>
+        </section>
+
+        <section style="text-align: left">
+          <h2>Widgetの裏側：BackdropFilter</h2>
+
+          <p>
+            画面を描画するとき、
+            <code>RenderBackdropFilter</code>
+            は
+            <code>canvas.saveLayer()</code>
+            を呼び出す。
+          </p>
+          <p><code>saveLayer()</code>がとても重い処理</p>
+          <p><code>saveLayer()</code>が呼ばれる際にGPUが担当すること</p>
+
+          <ol>
+            <li>今の画面の背景（はいけい）をコピーして、別の場所に保存する。</li>
+            <li>その背景に「ぼかし（Blur）」の計算をする。</li>
+            <li>ぼかした画像を、もう一度メインの画面に合成（ごうせい）する。</li>
+          </ol>
+
+          <p>
+            フレームごとに実行、
+            <span style="color: #ffff00">1秒間に60回から120回</span>
+          </p>
+
+          <aside class="notes"></aside>
         </section>
 
         <section>
-          <h2>BackdropFilterとエネルギー</h2>
-          <table width="100%">
-            <tbody>
-              <tr>
-                <!-- <td width="30%">
-                  <img
-                    width="100%"
-                    src="./assets/261026/Screenshot 2026-10-20 at 0.01.27.png"
-                    alt="BackdropFilterの描画負荷を減らす方法を説明した資料"
-                  />
-                </td> -->
-                <td valign="top">
-                  <ul>
-                    <li>背景をコピーし、ぼかして重ねる</li>
-                    <li>背景が更新されると、もう一度処理することがある</li>
-                    <li>範囲やフィルター数が大きいほど、描画の仕事が増える</li>
-                    <li>CPU・GPUの仕事が続くと、電力も増えることがある</li>
-                  </ul>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <aside class="notes">
-            <p>
-              BackdropFilterは、ガラスの見た目だけではなく、後ろにある画面を使って効果を作る処理です。
-            </p>
-            <p>
-              まず、すでに描かれた背景を必要な範囲で取り込みます。その背景をぼかして画面に重ね、最後に子どものwidgetをその上に描きます。
-            </p>
-            <p>
-              背景が変わると、ぼかしの結果も更新する必要が出ることがあります。範囲が広い、フィルターが多い、更新が頻繁、といった場合は、コピーやぼかし、合成の仕事が増えます。
-            </p>
-            <p>
-              その仕事にはGPUの描画処理やメモリの読み書きが必要です。CPUもフレームの準備をします。仕事が長く続けば、端末が使うエネルギーも増える可能性があります。
-            </p>
+          <p>パーフォマンスについてFlutter公式のドキュメントももちろんあります！</p>
 
-            <p class="furigana">
-              ふりがな:
-              見た目=みため、後ろ=うし、画面=がめん、使う=つか、効果=こうか、作る=つく、描く=えが、子ども=こども、変わる=か、結果=けっか、更新=こうしん、必要=ひつよう、範囲=はんい、広い=ひろ、多い=おお、頻繁=ひんぱん、場合=ばあい、仕事=しごと、合成=ごうせい、読み書き=よみかき、準備=じゅんび、長く=なが、続く=つづ、端末=たんまつ、使う=つか、可能性=かのうせい、今回=こんかい、最後=さいご、秒=びょう、側=がわ、通常表示=つうじょうひょうじ、それぞれ、同じ=おな、測定値=そくていち、示す=しめ、手がかり=てがかり、記録=きろく、原因=げんいん、特定=とくてい、両方=りょうほう、充電中=じゅうでんちゅう
-            </p>
-          </aside>
+          <img src="./assets/261026/Screenshot 2026-10-21 at 15.14.13.png" alt="" />
         </section>
 
         <section>
-          <h1>これで自分のアプリも<br />プロファイルしたい気分に<br />なったのでしょうか</h1>
+          <h1>Section３：アプリのエネルギー使用をどうやって測るのか</h1>
 
-          <aside class="notes">
-            <p>これで自分のアプリもプロファイルしたい気分になったのでしょうか</p>
-            <p>これからAndroidとiOSひとつずつのツールを紹介します</p>
-          </aside>
+          <p>Flutterだけだとみれる項目が限定され、Nativeのツールの方がより正確</p>
+
+          <aside class="notes"></aside>
         </section>
 
         <section>
           <p>Android Performance Analyzer</p>
-
           <img src="./assets/261026/Screenshot 2026-10-18 at 13.56.15.png" alt="" />
-
-          <aside class="notes">
-            <p>Android Performance Analyzerは、Androidのtraceを読み解くためのツールです。</p>
-            <p>CPUや描画の動きをたどり、性能の問題がありそうな場所を調べる助けになります。</p>
-            <p class="furigana">
-              ふりがな:
-              読み解く=よみとく、動き=うご、性能=せいのう、問題=もんだい、場所=ばしょ、調べる=しら、助け=たす、電力=でんりょく、直接=ちょくせつ、測る=はか、分析=ぶんせき、補助=ほじょ、道具=どうぐ
-            </p>
-          </aside>
+          <aside class="notes"></aside>
+        </section>
+        <section>
+          <p>Android Performance Analyzer: トレーステストを開始</p>
+          <img
+            style="max-height: 60vh; object-fit: contain"
+            src="./assets/261026/Screenshot 2026-10-21 at 15.34.10.png"
+            alt=""
+          />
+        </section>
+        <section>
+          <p>Android Performance Analyzer: トレーステストを開始</p>
+          <img
+            style="max-height: 50vh; object-fit: contain"
+            src="./assets/261026/Screenshot 2026-10-21 at 15.23.42.png"
+            alt=""
+          />
+        </section>
+        <section>
+          <p>Android Performance Analyzer: トレーステストを開始</p>
+          <img src="./assets/261026/Screenshot 2026-10-21 at 15.24.14.png" alt="" />
+        </section>
+        <section>
+          <p>Android Performance Analyzer: トレーステスト結果</p>
+          <img src="./assets/261026/Screenshot 2026-10-21 at 15.31.23.png" alt="" />
+        </section>
+        <section>
+          <p>Android Performance Analyzer: トレーステスト結果</p>
+          <img src="./assets/261026/Screenshot 2026-10-21 at 15.31.50.png" alt="" />
+        </section>
+        <section>
+          <p>Android Performance Analyzer: トレーステスト結果</p>
+          <img src="./assets/261026/Screenshot 2026-10-21 at 15.32.24.png" alt="" />
         </section>
 
-        <section>
+        <!-- <section>
           <p>Xcode Instruments・Energy Log</p>
 
           <img
@@ -532,19 +438,10 @@
             alt=""
           />
 
-          <aside class="notes">
-            <p>iOSでは、Xcode InstrumentsのEnergy Logを使います。</p>
-            <p>アプリの動作によるエネルギーへの影響を、傾向として確認できます。</p>
-            <p>電力や電池寿命を直接測るものではないため、同じ端末・同じ操作で前後を比べます。</p>
-            <p>次に、比較条件をそろえる方法を見ます。</p>
-            <p class="furigana">
-              ふりがな:
-              動作=どうさ、影響=えいきょう、傾向=けいこう、確認=かくにん、電力=でんりょく、電池寿命=でんちじゅみょう、直接=ちょくせつ、測る=はか、同じ=おな、端末=たんまつ、操作=そうさ、前後=ぜんご、比べる=くら、次=つぎ、比較条件=ひかくじょうけん、方法=ほうほう、見る=み
-            </p>
-          </aside>
-        </section>
+          <aside class="notes"></aside>
+        </section> -->
 
-        <section class="macrobenchmark-slide">
+        <!-- <section class="macrobenchmark-slide">
           <p>Macrobenchmarkを書く</p>
           <table width="100%">
             <tbody>
@@ -597,71 +494,59 @@ fun scrollHome() = benchmarkRule.measureRepeated(
               本体=ほんたい、別=べつ、テスト、同じ=おな、操作=そうさ、内部=ないぶ、関数=かんすう、直接=ちょくせつ、呼ぶ=よ、起動=きどう、反復回数=はんぷくかいすう、例=れい、回=かい、測る=はか、結果=けっか、各=かく、分析=ぶんせき、方法=ほうほう、見=み
             </p>
           </aside>
-        </section>
+        </section> -->
 
         <section>
-          <h2>System traceをAIと読み解く</h2>
-          <ol>
+          <h2>Android Performance Analyzer: Android Profiler Skills</h2>
+          <!-- <ol>
             <li>Macrobenchmarkの各反復から <code>.perfetto-trace</code> を得る</li>
             <li>Android StudioやAndroid Performance Analyzerでtraceを開く</li>
             <li>Android profiler skillに質問し、見る場所やPerfettoSQLを探す</li>
             <li>提案をtrace上で確認し、原因を決めつけない</li>
-          </ol>
+          </ol> -->
+          <p>Android CLIからインストール方法</p>
           <p><code>android skills add android-profiler</code></p>
+
+          <img
+            style="max-height: 50vh; object-fit: contain"
+            src="./assets/261026/Screenshot 2026-10-18 at 14.00.01.png"
+            alt=""
+          />
+
           <p>
             <a
               href="https://developer.android.com/android-performance-analyzer/analyze/ai#ai-analysis"
-              >参考：AIによるtrace分析ガイド</a
+              >Android Profiler: AI-powered analysis</a
             >
           </p>
-          <aside class="notes">
-            <p>
-              Macrobenchmarkは、指標だけでなく、反復ごとのsystem
-              traceも出力します。traceを開くと、測定中にCPUや描画などで何が起きたかを時間軸で調べられます。
-            </p>
-            <p>
-              Android Performance AnalyzerのAI分析ガイドでは、Android profiler
-              skillを使い、自然な言葉で質問してtraceの見どころを探したり、PerfettoSQLの作成を助けてもらったりできます。
-            </p>
-            <p>
-              これは調査の出発点です。AIの説明やクエリ結果はtraceと照らし合わせて確認します。観測が同時に起きたことだけで原因とは言えません。
-            </p>
-            <p>
-              Android Performance
-              Analyzerは主にゲームやVulkanの分析向けです。それ以外のアプリでは、Android
-              Studioのプロファイラを使います。
-            </p>
-            <p class="furigana">
-              ふりがな:
-              指標=しひょう、反復=はんぷく、出力=しゅつりょく、測定中=そくていちゅう、何=なに、起=お、時間軸=じかんじく、調べる=しら、自然=しぜん、言葉=ことば、質問=しつもん、見=みどころ、作成=さくせい、助=たす、出発点=しゅっぱつてん、説明=せつめい、結果=けっか、照=て、確認=かくにん、観測=かんそく、同時=どうじ、原因=げんいん、主=おも、分析向け=ぶんせきむけ、それ以外=いがい、使う=つか
-            </p>
-          </aside>
+          <aside class="notes"><</aside>
         </section>
 
         <section>
-          <h2>今日のまとめ</h2>
+          <h2>まとめ</h2>
           <ul>
-            <li>20秒の電力レール合計: 33.19 J（Liquid Glass）/ 25.79 J（通常表示）</li>
-            <li>差の約95%は最後の5秒。CPU・GPU活動と描画時間も増加</li>
-            <li>BackdropFilterの描画仕事は電力に影響があり</li>
-            <li>Macrobenchmarkの反復ごとにsystem traceを取得し、分析できる</li>
+            <li>エネルギー消費量を実際に測る手順・ツール</li>
+            <li>BackDropFilterなど、エネルギー消費量の多いWidgetに注意が必要</li>
+            <ul>
+              <li>
+                最終的には<span style="font-weight: bolder"
+                  >パフォーマンスとデザインのトレードオフ</span
+                >になる
+              </li>
+            </ul>
+            <li>計測することでトレードオフによるチーム判断の資料として、役に立つ</li>
           </ul>
-          <aside class="notes">
-            <p>最後に、今回の測定とベンチマークの要点を振り返ります。</p>
-            <p>
-              20秒間の電力レール合計は、Liquid
-              Glassが33.19ジュール、通常表示が25.79ジュールでした。差の約95パーセントは最後の5秒に集中していました。
-            </p>
-            <p>
-              同じ時間帯にCPU・GPU活動や描画時間も増えました。BackdropFilterの仕事が関係した可能性はありますが、この記録だけでは原因を特定できません。
-            </p>
-            <p>Macrobenchmarkではユーザー操作を繰り返し、各反復のsystem traceを分析に使えます。</p>
-            <p>ご清聴ありがとうございました。</p>
-            <p class="furigana">
-              ふりがな:
-              最後=さいご、今回=こんかい、測定=そくてい、要点=ようてん、振り返る=ふりかえ、間=かん、合計=ごうけい、通常表示=つうじょうひょうじ、差=さ、約=やく、最後=さいご、秒=びょう、集中=しゅうちゅう、同じ=おな、時間帯=じかんたい、活動=かつどう、描画時間=びょうがじかん、増える=ふ、仕事=しごと、関係=かんけい、可能性=かのうせい、記録=きろく、原因=げんいん、特定=とくてい、操作=そうさ、繰り返す=くりかえ、各=かく、反復=はんぷく、分析=ぶんせき、両方=りょうほう、充電中=じゅうでんちゅう、行う=おこな、単体=たんたい、消費電力=しょうひでんりょく、清聴=せいちょう
-            </p>
-          </aside>
+          <aside class="notes"></aside>
+        </section>
+
+        <section>
+          <p>
+            <code>
+              X @oopheliagame <br />
+              Github @opheliagame
+            </code>
+          </p>
+          <img style="width: 300px; height: 300px" src="./assets/261026/qrcode.png" alt="" />
         </section>
       </div>
     </div>
@@ -671,10 +556,6 @@ fun scrollHome() = benchmarkRule.measureRepeated(
       <img src="./assets/261026/imli.jpeg" alt="" />
       <img src="./assets/261026/21999998.jpeg" alt="" />
       <img src="./assets/261026/icon.png" alt="" />
-      <!-- <img src="./assets/261026/1756189026278.jpg" alt="" />
-      <img src="./assets/261026/imli.jpeg" alt="" />
-      <img src="./assets/261026/21999998.jpeg" alt="" />
-      <img src="./assets/261026/icon.png" alt="" /> -->
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/dist/reveal.js"></script>

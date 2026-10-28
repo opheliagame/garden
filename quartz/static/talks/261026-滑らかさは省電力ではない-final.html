@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>画面の滑らかさの裏側：DevToolsから考えるFlutterアプリのバッテリー消費と最適化</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Noto+Sans+JP:wght@100..900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/dist/reset.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/dist/reveal.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/dist/theme/white.css"
+    />
+    <link rel="stylesheet" href="./normalize.css" />
+    <link rel="stylesheet" href="./style.css" />
+    <style>
+      :root {
+        --paper: #218821;
+        --paper-muted: #24583c;
+        --gray: #e5e5e5;
+        --muted-ink: #e5e5e5;
+        --ink: #e5e5e5;
+        --pink: #ffff00;
+        --yellow: #ffff00;
+        --highlight: #ffff00;
+        /* --highlight: rgba(255, 0, 0, 0.12); */
+      }
+
+      .reveal,
+      .reveal h1,
+      .reveal h2,
+      .reveal h3,
+      .reveal .result-grid strong,
+      .reveal .question,
+      .reveal .placeholder-frame strong,
+      * {
+        font-family: "Kosugi Maru", sans-serif;
+      }
+
+      .reveal p {
+        font-size: xx-large;
+      }
+
+      .reveal mark,
+      .reveal .important {
+        background: var(--highlight);
+        color: var(--ink);
+        text-decoration: underline;
+        text-decoration-color: #ffff00;
+        text-underline-offset: 0.12em;
+      }
+
+      .reveal .chart-svg {
+        display: block;
+        height: auto;
+        margin: 0 auto;
+        max-height: 62vh;
+        object-fit: contain;
+        width: 100%;
+      }
+
+      .reveal h1 {
+        font-size: 4rem;
+      }
+
+      .reveal .slides > .energy-slide h1 {
+        font-size: 3.6rem;
+      }
+
+      .reveal h2 {
+        font-size: x-large;
+        text-align: left;
+        padding: 0 0 1rem 2rem;
+      }
+
+      .reveal h3 {
+        font-size: large;
+      }
+
+      .highlight {
+        color: var(--highlight);
+      }
+
+      .intro-scatter {
+        inset: 0;
+        pointer-events: none;
+        position: fixed;
+        z-index: 1;
+      }
+
+      .intro-scatter img {
+        max-width: none;
+        opacity: 0.4;
+        position: absolute;
+        transform: translate(-50%, -50%) rotate(var(--rotation));
+        width: clamp(64px, min(13vw, 16vh), 190px);
+      }
+
+      .intro-content {
+        position: relative;
+        z-index: 1;
+      }
+
+      .reveal {
+        position: relative;
+        z-index: 2;
+      }
+
+      .reveal .slides section a,
+      .reveal .slides section a:visited,
+      .reveal .slides section a:hover,
+      .reveal .slides section a:focus,
+      .reveal .slides section a:active {
+        font-size: medium;
+        color: var(--highlight);
+        text-decoration-color: var(--highlight);
+        text-decoration-line: underline;
+        /* text-decoration-style: wavy; */
+        /* text-underline-offset: 0.12em; */
+      }
+
+      code {
+        color: var(--highlight);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section>
+          <h1>画面の滑らかさの裏側<br />DevToolsから考えるFlutterアプリのバッテリー消費と最適化</h1>
+          <h3>Behind Smooth Scrolling: Evaluating Flutter App Battery Consumption via DevTools</h3>
+          <p class="highlight">anushka・opheliagame・アン</p>
+        </section>
+        <section class="intro-slide">
+          <div class="intro-content">
+            <h2>自己紹介</h2>
+            <ul>
+              <li>インド出身</li>
+              <li>flutter engineer 5年目</li>
+              <li>teamlab チームラボ 2年目</li>
+              <li>creative coding #p5.js</li>
+              <li>live coding #hydra #glsl</li>
+              <li>モノづくり 木工初心者</li>
+            </ul>
+          </div>
+        </section>
+
+        <section>
+          <h2>背景：BackdropFilter</h2>
+          <img src="./assets/261026/Screenshot 2026-10-28 at 10.52.24.png" alt="" />
+        </section>
+
+        <section>
+          <h2>背景：Performance</h2>
+          <img src="./assets/261026/Screenshot 2026-10-28 at 11.01.47.png" alt="" />
+          <a href="https://flutter.dev/blog/building-performant-flutter-widgets"
+            >Building performant Flutter widgets</a
+          >
+        </section>
+
+        <section>
+          <h2>調査：Liquid Glass + BackdropFilter</h2>
+          <p>
+            Liquid
+            Glassのぼかしを実装するために使う画面全体のBackdropFilterはパーフォマンスにどれぐらい影響あるのでしょうか？🤔
+          </p>
+        </section>
+
+        <section>
+          <!-- image of app -->
+          <!-- <img src="" alt="" />  -->
+        </section>
+
+        <section>
+          <h1>アプリのエネルギー使用をどうやって測るのか</h1>
+          <p>Flutterだけだとみれる項目が限定され、Nativeのツールの方がより正確</p>
+        </section>
+
+        <section>
+          <p>Android Performance Analyzer</p>
+          <img src="./assets/261026/Screenshot 2026-10-18 at 13.56.15.png" alt="" />
+        </section>
+        <section>
+          <p>Android Performance Analyzer: トレーステストを開始</p>
+          <img
+            style="max-height: 60vh; object-fit: contain"
+            src="./assets/261026/Screenshot 2026-10-21 at 15.34.10.png"
+            alt=""
+          />
+        </section>
+        <section>
+          <p>Android Performance Analyzer: トレーステストを開始</p>
+          <img
+            style="max-height: 50vh; object-fit: contain"
+            src="./assets/261026/Screenshot 2026-10-21 at 15.23.42.png"
+            alt=""
+          />
+        </section>
+        <section>
+          <p>Android Performance Analyzer: トレーステストを開始</p>
+          <img src="./assets/261026/Screenshot 2026-10-21 at 15.24.14.png" alt="" />
+        </section>
+        <section>
+          <p>Android Performance Analyzer: トレーステスト結果</p>
+          <img src="./assets/261026/Screenshot 2026-10-21 at 15.31.23.png" alt="" />
+        </section>
+        <section>
+          <p>Android Performance Analyzer: トレーステスト結果</p>
+          <img src="./assets/261026/Screenshot 2026-10-21 at 15.31.50.png" alt="" />
+        </section>
+        <section>
+          <p>Android Performance Analyzer: トレーステスト結果</p>
+          <img src="./assets/261026/Screenshot 2026-10-21 at 15.32.24.png" alt="" />
+        </section>
+
+        <section>
+          <h2>Android Performance Analyzer: Android Profiler Skills</h2>
+          <p>Android CLIからインストール方法</p>
+          <p><code>android skills add android-profiler</code></p>
+          <img
+            style="max-height: 50vh; object-fit: contain"
+            src="./assets/261026/Screenshot 2026-10-18 at 14.00.01.png"
+            alt=""
+          />
+          <p>
+            <a
+              href="https://developer.android.com/android-performance-analyzer/analyze/ai#ai-analysis"
+              >Android Profiler: AI-powered analysis</a
+            >
+          </p>
+        </section>
+
+        <section>
+          <h2>計測結果：ぼかし（FlutterでLiquid Glass実装）・エネルギー</h2>
+
+          <h1>ぼかし中はエネルギー利用が28%増加</h1>
+
+          <img class="chart-svg" src="./assets/261026/power-chart.svg" alt="平均電力の比較グラフ" />
+        </section>
+
+        <section>
+          <h1>なぜこのような結果になったのでしょうか</h1>
+        </section>
+
+        <section style="text-align: left">
+          <h2>Widgetの裏側：BackdropFilter</h2>
+
+          <p>
+            画面を描画するとき、
+            <code>RenderBackdropFilter</code>
+            は
+            <code>canvas.saveLayer()</code>
+            を呼び出す。
+          </p>
+          <p><code>saveLayer()</code>がとても重い処理</p>
+          <p><code>saveLayer()</code>が呼ばれる際にGPUが担当すること</p>
+
+          <ol>
+            <li>今の画面の背景（はいけい）をコピーして、別の場所に保存する。</li>
+            <li>その背景に「ぼかし（Blur）」の計算をする。</li>
+            <li>ぼかした画像を、もう一度メインの画面に合成（ごうせい）する。</li>
+          </ol>
+
+          <p>
+            フレームごとに実行、
+            <span style="color: #ffff00">1秒間に60回から120回</span>
+          </p>
+        </section>
+
+        <section>
+          <h2>ドキュメントを確認</h2>
+          <img src="./assets/261026/Screenshot 2026-10-28 at 11.36.47.png" alt="" />
+        </section>
+
+        <section>
+          <h3>
+            「This effect is relatively expensive, especially if the filter is non-local, such as a
+            blur.」
+          </h3>
+          <h3>
+            「この処理は比較的コストが高い。特に、ぼかしのように、フィルタが非局所的である場合はなおさらである。」
+          </h3>
+          <h3>+</h3>
+          <h3>画面全体ぼかし、いわゆるLiquidGlass実装</h3>
+          <h3>=</h3>
+          <h3>結果</h3>
+
+          <h1>なるほど！</h1>
+        </section>
+
+        <section>
+          <h2>まとめ</h2>
+          <ul>
+            <li>エネルギー消費量を実際に測る手順・ツール</li>
+            <li>BackdropFilterなど、エネルギー消費量の多いWidgetに注意が必要</li>
+            <ul>
+              <li>
+                最終的には<span style="font-weight: bolder"
+                  >パフォーマンスとデザインのトレードオフ</span
+                >になる
+              </li>
+            </ul>
+            <li>計測することでトレードオフによるチーム判断の資料として、役に立つ</li>
+          </ul>
+        </section>
+
+        <section>
+          <p>
+            <code>
+              X @oopheliagame <br />
+              Github @opheliagame
+            </code>
+          </p>
+          <img style="width: 300px; height: 300px" src="./assets/261026/qrcode.png" alt="" />
+        </section>
+
+        <!-- <section>
+          <p>Xcode Instruments・Energy Log</p>
+
+          <img
+            style="height: 70vh; max-height: 70vh; object-fit: contain"
+            src="./assets/261026/Screenshot 2026-10-20 at 0.13.03.png"
+            alt=""
+          />
+
+        </section> -->
+
+        <!-- --------------- END --------------- -->
+
+        <!-- <section>
+          <h2>計測結果：エネルギーの基本</h2>
+
+          <ul>
+            <li>CPU/GPUを使うほどエネルギー消費になる</li>
+            <li>特に画面が何も動いていない時が大事</li>
+          </ul>
+
+          <img src="./assets/261026/Screenshot 2026-10-21 at 14.59.20.png" alt="" />
+
+          <a href="https://docs.flutter.dev/perf/metrics" target="_blank"
+            >Flutter: Performance metrics</a
+          >
+        </section>
+
+        <section>
+          <h2>計測結果：ぼかし（FlutterでLiquid Glass実装）・CPU/GPU</h2>
+          <img
+            class="chart-svg"
+            src="./assets/261026/activity-chart.svg"
+            alt="CPUとGPUの活動時間の比較グラフ"
+          />
+        </section>
+
+        <section>
+          <h2>計測結果：まとめ</h2>
+          <table style="font-size: xx-large">
+            <thead>
+              <tr>
+                <th>指標</th>
+                <th>区間</th>
+                <th>通常表示</th>
+                <th>Liquid Glass</th>
+                <th>差</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th>電力レールエネルギー</th>
+                <td>20秒</td>
+                <td>25.79 J</td>
+                <td>33.19 J</td>
+                <td>+28.7%</td>
+              </tr>
+              <tr>
+                <th>アプリCPU実行時間</th>
+                <td>最後の5秒</td>
+                <td>2.265 CPU秒</td>
+                <td>6.576 CPU秒</td>
+                <td>+190%</td>
+              </tr>
+              <tr>
+                <th>GPU活動時間</th>
+                <td>最後の5秒</td>
+                <td>1.691秒</td>
+                <td>2.567秒</td>
+                <td>+51.8%</td>
+              </tr>
+              <tr>
+                <th><code>Canvas::saveLayer</code>開始回数</th>
+                <td>最後の5秒</td>
+                <td>11回</td>
+                <td>3,050回</td>
+                <td>+3,039回</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section>
+          <h1>Section２：FlutterのWidgetとエネルギー消費の関係は何なのか</h1>
+          <h2>ぼかしを実現するときに使うBackdropFilterの裏側</h2>
+        </section>
+
+        <section>
+           <h2>Widgetの裏側：BackdropFilter</h2> 
+
+          <img
+            style="width: 100%; height: 95vh; max-height: 100vh"
+            src="./assets/261026/mermaid-diagram-2026-10-21-142824.svg"
+            alt="BackdropFilterの描画シーケンス図"
+          />
+        </section>
+
+        <section>
+          <p>パーフォマンスについてFlutter公式のドキュメントももちろんあります！</p>
+
+          <img src="./assets/261026/Screenshot 2026-10-21 at 15.14.13.png" alt="" />
+        </section> -->
+      </div>
+    </div>
+
+    <div class="intro-scatter" aria-hidden="true" hidden>
+      <img src="./assets/261026/1756189026278.jpg" alt="" />
+      <img src="./assets/261026/imli.jpeg" alt="" />
+      <img src="./assets/261026/21999998.jpeg" alt="" />
+      <img src="./assets/261026/icon.png" alt="" />
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/dist/reveal.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/plugin/notes/notes.js"></script>
+    <script>
+      const scatterSlots = [
+        [18, 20],
+        [82, 20],
+        [18, 80],
+        [82, 80],
+      ]
+      for (let index = scatterSlots.length - 1; index > 0; index -= 1) {
+        const swapIndex = Math.floor(Math.random() * (index + 1))
+        const slot = scatterSlots[index]
+        scatterSlots[index] = scatterSlots[swapIndex]
+        scatterSlots[swapIndex] = slot
+      }
+
+      const scatter = document.querySelector(".intro-scatter")
+      scatter.querySelectorAll("img").forEach((image, index) => {
+        const [left, top] = scatterSlots[index]
+        image.style.left = `${left + (Math.random() * 8 - 4)}%`
+        image.style.top = `${top + (Math.random() * 8 - 4)}%`
+        image.style.setProperty("--rotation", `${Math.random() * 30 - 15}deg`)
+      })
+
+      const updateScatterVisibility = (event) => {
+        const currentSlide = event?.currentSlide ?? Reveal.getCurrentSlide()
+        scatter.hidden = !currentSlide?.classList.contains("intro-slide")
+      }
+      Reveal.on("ready", updateScatterVisibility)
+      Reveal.on("slidechanged", updateScatterVisibility)
+
+      Reveal.initialize({
+        hash: true,
+        slideNumber: "c/t",
+        controls: true,
+        progress: true,
+        transition: "fade",
+        transitionSpeed: "fast",
+        plugins: [RevealNotes],
+      })
+    </script>
+  </body>
+</html>
