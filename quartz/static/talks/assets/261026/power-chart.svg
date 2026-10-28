@@ -13,7 +13,7 @@
     <circle cx="935" cy="38" r="10" fill="#ff1493" />
     <text x="955" y="47" font-size="26">Liquid Glass</text>
 
-    <text x="60" y="88" font-size="23" fill="#2d9d5c">起動から</text>
+    <!-- <text x="60" y="88" font-size="23" fill="#2d9d5c">起動から</text> -->
     <text x="350" y="88" font-size="23" fill="#2d9d5c">平均電力（W）</text>
     <g font-size="22" fill="#2d9d5c" text-anchor="middle">
       <text x="350" y="118">0</text>
@@ -31,10 +31,12 @@
     </g>
 
     <g font-size="26">
-      <text x="60" y="170">+3–8秒</text>
-      <text x="60" y="247">+8–13秒</text>
-      <text x="60" y="324">+13–18秒</text>
-      <text x="60" y="401" font-weight="700">+18–23秒</text>
+      <text x="60" y="170">エネルギー</text>
+      <text font-size="16" x="60" y="247">アプリCPU実行時間</text>
+      <text font-size="16" x="60" y="270"> （CPU秒 / 5秒）</text>
+      <text font-size="16" x="60" y="324">アプリのGPU活動時間</text>
+      <text font-size="16" x="60" y="350">（秒 / 5秒）</text>
+      <!-- <text x="60" y="401" font-weight="700">+18–23秒</text> -->
     </g>
     <g font-size="21" fill="#2d9d5c">
       <text x="245" y="157">通常</text>
@@ -43,32 +45,32 @@
       <text x="245" y="256">Glass</text>
       <text x="245" y="311">通常</text>
       <text x="245" y="333">Glass</text>
-      <text x="245" y="388">通常</text>
-      <text x="245" y="410">Glass</text>
+      <!-- <text x="245" y="388">通常</text>
+      <text x="245" y="410">Glass</text> -->
     </g>
 
     <g fill="#2d9d5c">
       <rect x="350" y="143" width="339.6" height="16" rx="3" />
       <rect x="350" y="220" width="188" height="16" rx="3" />
       <rect x="350" y="297" width="232.4" height="16" rx="3" />
-      <rect x="350" y="374" width="271.4" height="16" rx="3" />
+      <!-- <rect x="350" y="374" width="271.4" height="16" rx="3" /> -->
     </g>
     <g fill="#ff1493">
       <rect x="350" y="165" width="431.2" height="16" rx="3" />
       <rect x="350" y="242" width="175.2" height="16" rx="3" />
       <rect x="350" y="319" width="167.8" height="16" rx="3" />
-      <rect x="350" y="396" width="553.4" height="16" rx="3" />
+      <!-- <rect x="350" y="396" width="553.4" height="16" rx="3" /> -->
     </g>
 
     <g font-size="22" font-weight="700">
-      <text x="704" y="158">1.698 W</text>
-      <text x="796" y="180">2.156 W</text>
-      <text x="552" y="235">0.940 W</text>
-      <text x="539" y="257">0.876 W</text>
-      <text x="596" y="312">1.162 W</text>
-      <text x="532" y="334">0.839 W</text>
-      <text x="635" y="389">1.357 W</text>
-      <text x="917" y="411">2.767 W</text>
+      <text x="704" y="158">4.9 W</text>
+      <text x="796" y="180">6.4 W</text>
+      <text x="552" y="235">2.265 秒</text>
+      <text x="539" y="257">6.576 秒</text>
+      <text x="596" y="312">1.691 秒</text>
+      <text x="532" y="334">2.567 秒</text>
+      <!-- <text x="635" y="389">1.357 W</text>
+      <text x="917" y="411">2.767 W</text> -->
     </g>
 
     <!-- <text x="60" y="464" font-size="24" font-weight="700" fill="#ff1493">
