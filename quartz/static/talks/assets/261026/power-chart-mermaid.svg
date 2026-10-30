@@ -146,9 +146,9 @@
         transform="translate(530.4110087194697, 21.479953650057936) rotate(0)">電力レールのエネルギー消費量（20秒）</text></g>
     <g class="plot">
       <g class="bar-plot-0">
-        <rect x="68.3720174389394" y="171.0814573239783" width="286.9" height="226.29342244454355" fill="#027DFD"
-          stroke="#027DFD" stroke-width="0" />
-        <rect x="705.55" y="108.3464093176708" width="286.9" height="289.02847045085105" fill="#027DFD" stroke="#027DFD"
+        <rect x="68.3720174389394" y="171.0814573239783" width="286.9" height="226.29342244454355" fill="#1CDAC5"
+          stroke="#1CDAC5" stroke-width="0" />
+        <rect x="705.55" y="108.3464093176708" width="286.9" height="289.02847045085105" fill="#F25D50" stroke="#F25D50"
           stroke-width="0" /><text x="211.82201743893938" y="161.0814573239783" text-anchor="middle"
           dominant-baseline="auto" fill="#333" font-size="81px">25.79</text><text x="849" y="98.3464093176708"
           text-anchor="middle" dominant-baseline="auto" fill="#333" font-size="81px">33.19</text>
